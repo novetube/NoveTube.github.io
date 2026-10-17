@@ -75,14 +75,18 @@
             </div>
         </section>
 
-        <!-- View 2: YouTube Watch Layout -->
+        <!-- View 2: Non-YouTube Watch Layout -->
         <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left Side: Player & Info -->
             <div class="lg:col-span-2 space-y-4">
-                <!-- Privacy-Enhanced YouTube Player -->
-                <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800">
-                    <iframe id="privacyPlayer" class="w-full h-full border-0" allowfullscreen 
+                <!-- Multi-Node Privacy Player -->
+                <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800 flex items-center justify-center">
+                    <div id="playerLoading" class="absolute inset-0 bg-black flex flex-col items-center justify-center space-y-3 z-10">
+                        <div class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p class="text-xs text-neutral-400 font-mono">Finding working stream instance...</p>
+                    </div>
+                    <iframe id="standalonePlayer" class="w-full h-full border-0 relative z-0" allowfullscreen 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                     </iframe>
                 </div>
@@ -121,10 +125,19 @@
     </main>
 
     <script>
-        // Key is securely injected by GitHub Actions secret substitution
+        // Secret placeholder injected securely during GitHub Actions build pipeline
         const API_KEY = '__YOUTUBE_API_KEY__';
 
         let currentChannelId = '';
+
+        // Curated, live open-source streaming nodes
+        const STREAM_NODES = [
+            'https://inv.nadeko.net',
+            'https://invidious.nerdvpn.de',
+            'https://yt.chocolatemoo53.com',
+            'https://invidious.tiekoetter.com',
+            'https://piped.video'
+        ];
 
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -145,7 +158,7 @@
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
             document.getElementById('channelHeader').classList.add('hidden');
-            document.getElementById('privacyPlayer').src = '';
+            document.getElementById('standalonePlayer').src = '';
             if (document.getElementById('videoGrid').children.length === 0) {
                 fetchTrendingVideos();
             }
@@ -196,7 +209,7 @@
             document.getElementById('feedTitle').innerText = `Results for "${query}"`;
             
             const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Searching YouTube...</div>';
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Searching...</div>';
 
             try {
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query)}&key=${API_KEY}`);
@@ -223,7 +236,7 @@
             window.history.pushState({}, '', `?ch=${channelIdentifier}`);
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
-            document.getElementById('privacyPlayer').src = '';
+            document.getElementById('standalonePlayer').src = '';
 
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading channel...</div>';
@@ -301,14 +314,22 @@
             document.getElementById('feedView').classList.add('hidden');
             document.getElementById('watchView').classList.remove('hidden');
 
-            // Set up privacy-enhanced player embed (100% reliable)
-            const iframe = document.getElementById('privacyPlayer');
-            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
+            const loader = document.getElementById('playerLoading');
+            const iframe = document.getElementById('standalonePlayer');
+            
+            loader.classList.remove('hidden');
+            iframe.src = '';
 
             document.getElementById('videoTitle').innerText = 'Loading details...';
             document.getElementById('videoChannel').innerText = '';
             document.getElementById('videoViews').innerText = '';
             document.getElementById('videoDescription').innerText = '';
+
+            // Dynamic Failover Stream Allocation
+            findActiveStreamUrl(videoId).then(embedUrl => {
+                iframe.src = embedUrl;
+                iframe.onload = () => loader.classList.add('hidden');
+            });
 
             try {
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
@@ -329,6 +350,22 @@
             } catch (err) {
                 console.error("Failed to load video details", err);
             }
+        }
+
+        // Tests instances in real-time and picks the first working node
+        async function findActiveStreamUrl(videoId) {
+            for (const node of STREAM_NODES) {
+                try {
+                    const ping = await fetch(`${node}/api/v1/videos/${videoId}`, { method: 'HEAD' });
+                    if (ping.ok) {
+                        return `${node}/embed/${videoId}?autoplay=1`;
+                    }
+                } catch (e) {
+                    // Try next node if node is offline/blocked
+                }
+            }
+            // Fallback to primary node if pings are blocked by CORS
+            return `${STREAM_NODES[0]}/embed/${videoId}?autoplay=1`;
         }
 
         async function fetchRelatedVideos(categoryId) {
