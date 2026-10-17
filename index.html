@@ -75,20 +75,22 @@
             </div>
         </section>
 
-        <!-- View 2: Non-YouTube Watch Layout -->
+        <!-- View 2: Native Player Watch Layout -->
         <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left Side: Player & Info -->
             <div class="lg:col-span-2 space-y-4">
-                <!-- Multi-Node Privacy Player -->
+                <!-- Native HTML5 Video Container -->
                 <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800 flex items-center justify-center">
                     <div id="playerLoading" class="absolute inset-0 bg-black flex flex-col items-center justify-center space-y-3 z-10">
                         <div class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="text-xs text-neutral-400 font-mono">Finding working stream instance...</p>
+                        <p id="statusMsg" class="text-xs text-neutral-400 font-mono">Bypassing Google tracking...</p>
                     </div>
-                    <iframe id="standalonePlayer" class="w-full h-full border-0 relative z-0" allowfullscreen 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-                    </iframe>
+
+                    <!-- Native HTML5 Player (No YouTube Embeds) -->
+                    <video id="nativeVideoPlayer" class="w-full h-full relative z-0" controls autoplay playsinline>
+                        Your browser does not support HTML5 video streaming.
+                    </video>
                 </div>
 
                 <!-- Video Metadata -->
@@ -130,13 +132,17 @@
 
         let currentChannelId = '';
 
-        // Curated, live open-source streaming nodes
-        const STREAM_NODES = [
+        // Privacy Stream Resolvers Network
+        const PIPED_APIS = [
+            'https://pipedapi.kavin.rocks',
+            'https://api.piped.privacydev.net',
+            'https://pipedapi.tokhmi.xyz'
+        ];
+
+        const INVIDIOUS_APIS = [
             'https://inv.nadeko.net',
             'https://invidious.nerdvpn.de',
-            'https://yt.chocolatemoo53.com',
-            'https://invidious.tiekoetter.com',
-            'https://piped.video'
+            'https://invidious.tiekoetter.com'
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -158,7 +164,11 @@
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
             document.getElementById('channelHeader').classList.add('hidden');
-            document.getElementById('standalonePlayer').src = '';
+            
+            const player = document.getElementById('nativeVideoPlayer');
+            player.pause();
+            player.src = '';
+            
             if (document.getElementById('videoGrid').children.length === 0) {
                 fetchTrendingVideos();
             }
@@ -236,7 +246,10 @@
             window.history.pushState({}, '', `?ch=${channelIdentifier}`);
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
-            document.getElementById('standalonePlayer').src = '';
+            
+            const player = document.getElementById('nativeVideoPlayer');
+            player.pause();
+            player.src = '';
 
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading channel...</div>';
@@ -315,22 +328,30 @@
             document.getElementById('watchView').classList.remove('hidden');
 
             const loader = document.getElementById('playerLoading');
-            const iframe = document.getElementById('standalonePlayer');
+            const statusMsg = document.getElementById('statusMsg');
+            const videoPlayer = document.getElementById('nativeVideoPlayer');
             
             loader.classList.remove('hidden');
-            iframe.src = '';
+            videoPlayer.pause();
+            videoPlayer.src = '';
 
-            document.getElementById('videoTitle').innerText = 'Loading details...';
+            document.getElementById('videoTitle').innerText = 'Loading video details...';
             document.getElementById('videoChannel').innerText = '';
             document.getElementById('videoViews').innerText = '';
             document.getElementById('videoDescription').innerText = '';
 
-            // Dynamic Failover Stream Allocation
-            findActiveStreamUrl(videoId).then(embedUrl => {
-                iframe.src = embedUrl;
-                iframe.onload = () => loader.classList.add('hidden');
+            // Fetch video stream link through multi-network failover
+            resolveNativeStream(videoId, statusMsg).then(streamUrl => {
+                if (streamUrl) {
+                    videoPlayer.src = streamUrl;
+                    videoPlayer.onloadeddata = () => loader.classList.add('hidden');
+                    videoPlayer.play().catch(e => console.log('Autoplay deferred', e));
+                } else {
+                    statusMsg.innerText = "Error: All stream proxies are currently offline.";
+                }
             });
 
+            // Metadata Fetch
             try {
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
                 const data = await res.json();
@@ -352,20 +373,35 @@
             }
         }
 
-        // Tests instances in real-time and picks the first working node
-        async function findActiveStreamUrl(videoId) {
-            for (const node of STREAM_NODES) {
+        // Multi-Engine Stream Resolver
+        async function resolveNativeStream(videoId, statusElement) {
+            // Engine 1: Piped Streams
+            for (const endpoint of PIPED_APIS) {
                 try {
-                    const ping = await fetch(`${node}/api/v1/videos/${videoId}`, { method: 'HEAD' });
-                    if (ping.ok) {
-                        return `${node}/embed/${videoId}?autoplay=1`;
-                    }
-                } catch (e) {
-                    // Try next node if node is offline/blocked
-                }
+                    statusElement.innerText = "Connecting to Piped Engine...";
+                    const res = await fetch(`${endpoint}/streams/${videoId}`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    
+                    const stream = data.videoStreams?.find(s => s.container === 'm4a' || s.quality === '720p') || data.videoStreams?.[0];
+                    if (stream && stream.url) return stream.url;
+                } catch (e) {}
             }
-            // Fallback to primary node if pings are blocked by CORS
-            return `${STREAM_NODES[0]}/embed/${videoId}?autoplay=1`;
+
+            // Engine 2: Invidious Streams
+            for (const endpoint of INVIDIOUS_APIS) {
+                try {
+                    statusElement.innerText = "Connecting to Invidious Engine...";
+                    const res = await fetch(`${endpoint}/api/v1/videos/${videoId}`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+
+                    const stream = data.formatStreams?.find(s => s.container === 'mp4') || data.formatStreams?.[0];
+                    if (stream && stream.url) return stream.url;
+                } catch (e) {}
+            }
+
+            return null;
         }
 
         async function fetchRelatedVideos(categoryId) {
