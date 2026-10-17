@@ -41,7 +41,7 @@
         <!-- Search Bar -->
         <form onsubmit="handleSearch(event)" class="flex items-center w-full max-w-2xl mx-4">
             <div class="flex w-full bg-[#121212] border border-neutral-700 rounded-l-full overflow-hidden focus-within:border-blue-500">
-                <input type="text" id="searchInput" placeholder="Search videos or enter @channel..." 
+                <input type="text" id="searchInput" placeholder="Search videos or enter channel ID..." 
                     class="w-full bg-transparent px-5 py-2 text-sm text-white focus:outline-none">
             </div>
             <button type="submit" class="bg-neutral-800 border border-l-0 border-neutral-700 px-6 py-2 rounded-r-full hover:bg-neutral-700 transition">
@@ -52,90 +52,71 @@
         <div class="w-10"></div>
     </header>
 
-    <!-- Main Content Grid -->
+    <!-- Main Content Container -->
     <main class="flex-1 max-w-[1800px] w-full mx-auto p-4 md:p-6">
         
-        <!-- View 1: Feed & Channel Pages -->
+        <!-- View 1: Feed & Channel Uploads -->
         <section id="feedView" class="space-y-6">
-            <!-- Channel Header Banner -->
             <div id="channelHeader" class="hidden bg-ytCard p-6 rounded-2xl border border-neutral-800 flex items-center gap-6">
                 <img id="channelAvatar" class="w-20 h-20 rounded-full border-2 border-neutral-700 object-cover" src="" alt="">
                 <div class="space-y-1">
                     <h1 id="channelTitle" class="text-2xl font-bold"></h1>
-                    <p id="channelHandle" class="text-xs text-neutral-400 font-mono"></p>
                     <p id="channelStats" class="text-sm text-neutral-300"></p>
                 </div>
             </div>
 
-            <!-- Feed Title -->
             <h2 id="feedTitle" class="text-xl font-bold text-white tracking-wide">Trending</h2>
 
-            <!-- Video Grid -->
             <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
             </div>
         </section>
 
-        <!-- View 2: Watch Layout -->
+        <!-- View 2: Native HTML5 Player Watch View -->
         <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Left Side: Player & Info -->
             <div class="lg:col-span-2 space-y-4">
-                <!-- Video Player Box with Loading Overlay -->
+                <!-- Native Video Player -->
                 <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800 flex items-center justify-center">
                     <div id="playerLoading" class="absolute inset-0 bg-black flex flex-col items-center justify-center space-y-3 z-10">
                         <div class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                        <p id="statusMsg" class="text-xs text-neutral-400 font-mono">Connecting to privacy stream...</p>
+                        <p id="statusMsg" class="text-xs text-neutral-400 font-mono">Resolving direct video stream...</p>
                     </div>
-                    <iframe id="privacyPlayer" class="w-full h-full border-0 relative z-0" allowfullscreen 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
-                    </iframe>
+                    <video id="nativePlayer" class="w-full h-full relative z-0" controls autoplay playsinline>
+                        Your browser does not support HTML5 video.
+                    </video>
                 </div>
 
-                <!-- Video Metadata -->
+                <!-- Metadata -->
                 <div class="space-y-2">
                     <h1 id="videoTitle" class="text-xl font-bold text-white leading-snug"></h1>
-                    
                     <div class="flex items-center justify-between border-b border-neutral-800 pb-4">
-                        <div id="authorBox" class="flex items-center gap-3 cursor-pointer group" onclick="loadChannel(currentChannelId)">
-                            <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-red-500">
-                                ▶
-                            </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-red-500">▶</div>
                             <div>
-                                <h3 id="videoChannel" class="font-bold text-sm text-white group-hover:underline"></h3>
+                                <h3 id="videoChannel" class="font-bold text-sm text-white"></h3>
                                 <p id="videoViews" class="text-xs text-neutral-400"></p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Description Box -->
                     <div class="bg-ytCard p-4 rounded-xl border border-neutral-800 mt-4">
                         <p id="videoDescription" class="text-sm text-neutral-300 whitespace-pre-line leading-relaxed text-xs md:text-sm"></p>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Up Next Recommendations -->
+            <!-- Sidebar Recommendations -->
             <div class="space-y-4">
                 <h3 class="font-bold text-base text-neutral-200">Up Next</h3>
-                <div id="relatedGrid" class="space-y-3">
-                </div>
+                <div id="relatedGrid" class="space-y-3"></div>
             </div>
         </section>
-
     </main>
 
     <script>
-        // Secret placeholder injected securely during GitHub Actions build pipeline
-        const API_KEY = '__YOUTUBE_API_KEY__';
-
-        let currentChannelId = '';
-
-        // Robust, distributed pool of privacy embed generators
-        const EMBED_PROVIDERS = [
-            id => `https://piped.video/embed/${id}?autoplay=1`,
-            id => `https://vid.puffyan.us/embed/${id}?autoplay=1`,
-            id => `https://inv.nadeko.net/embed/${id}?autoplay=1`,
-            id => `https://invidious.nerdvpn.de/embed/${id}?autoplay=1`
+        // High-availability Invidious API instances
+        const INVIDIOUS_INSTANCES = [
+            'https://inv.nadeko.net',
+            'https://invidious.nerdvpn.de',
+            'https://vid.puffyan.us'
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -157,7 +138,11 @@
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
             document.getElementById('channelHeader').classList.add('hidden');
-            document.getElementById('privacyPlayer').src = '';
+            
+            const player = document.getElementById('nativePlayer');
+            player.pause();
+            player.src = '';
+            
             if (document.getElementById('videoGrid').children.length === 0) {
                 fetchTrendingVideos();
             }
@@ -168,39 +153,43 @@
             const query = document.getElementById('searchInput').value.trim();
             if (!query) return;
 
-            if (query.startsWith('@') || query.startsWith('UC')) {
+            if (query.startsWith('UC')) {
                 loadChannel(query);
             } else {
                 searchVideos(query);
             }
         }
 
+        // Fetch Trending Videos via Invidious API
         async function fetchTrendingVideos() {
             document.getElementById('feedTitle').innerText = 'Trending Videos';
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading videos...</div>';
 
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&maxResults=20&regionCode=US&key=${API_KEY}`);
-                const data = await res.json();
-
-                if (data.items) {
-                    renderVideoGrid(data.items.map(item => ({
-                        videoId: item.id,
-                        title: item.snippet.title,
-                        channelTitle: item.snippet.channelTitle,
-                        channelId: item.snippet.channelId,
-                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
-                        publishedAt: formatDate(item.snippet.publishedAt),
-                        views: item.statistics?.viewCount ? formatViews(item.statistics.viewCount) : ''
+            for (const instance of INVIDIOUS_INSTANCES) {
+                try {
+                    const res = await fetch(`${instance}/api/v1/trending?region=US`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    
+                    renderVideoGrid(data.map(item => ({
+                        videoId: item.videoId,
+                        title: item.title,
+                        channelTitle: item.author,
+                        channelId: item.authorId,
+                        thumbnail: item.videoThumbnails?.find(t => t.quality === 'high']?.url || item.videoThumbnails?.[0]?.url,
+                        publishedAt: item.publishedText,
+                        views: formatViews(item.viewCount)
                     })));
+                    return;
+                } catch (e) {
+                    console.warn(`Instance ${instance} failed, trying next...`);
                 }
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Failed to load content.</div>';
             }
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Failed to load content from instances.</div>';
         }
 
+        // Search via Invidious API
         async function searchVideos(query) {
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
@@ -208,82 +197,70 @@
             document.getElementById('feedTitle').innerText = `Results for "${query}"`;
             
             const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Searching YouTube...</div>';
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Searching...</div>';
 
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query)}&key=${API_KEY}`);
-                const data = await res.json();
-                
-                if (data.items) {
-                    renderVideoGrid(data.items.map(item => ({
-                        videoId: item.id.videoId,
-                        title: item.snippet.title,
-                        channelTitle: item.snippet.channelTitle,
-                        channelId: item.snippet.channelId,
-                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
-                        publishedAt: formatDate(item.snippet.publishedAt),
-                        views: ''
+            for (const instance of INVIDIOUS_INSTANCES) {
+                try {
+                    const res = await fetch(`${instance}/api/v1/search?q=${encodeURIComponent(query)}`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+
+                    renderVideoGrid(data.map(item => ({
+                        videoId: item.videoId,
+                        title: item.title,
+                        channelTitle: item.author,
+                        channelId: item.authorId,
+                        thumbnail: item.videoThumbnails?.find(t => t.quality === 'high']?.url || item.videoThumbnails?.[0]?.url,
+                        publishedAt: item.publishedText,
+                        views: formatViews(item.viewCount)
                     })));
-                }
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Search request failed.</div>';
+                    return;
+                } catch (e) {}
             }
         }
 
-        async function loadChannel(channelIdentifier) {
-            window.history.pushState({}, '', `?ch=${channelIdentifier}`);
+        // Load Channel Uploads via Invidious API
+        async function loadChannel(channelId) {
+            window.history.pushState({}, '', `?ch=${channelId}`);
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
-            document.getElementById('privacyPlayer').src = '';
+            
+            const player = document.getElementById('nativePlayer');
+            player.pause();
+            player.src = '';
 
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading channel...</div>';
 
-            try {
-                let url = channelIdentifier.startsWith('UC') 
-                    ? `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id=${channelIdentifier}&key=${API_KEY}`
-                    : `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&forHandle=${encodeURIComponent(channelIdentifier)}&key=${API_KEY}`;
+            for (const instance of INVIDIOUS_INSTANCES) {
+                try {
+                    const res = await fetch(`${instance}/api/v1/channels/${channelId}`);
+                    if (!res.ok) continue;
+                    const ch = await res.json();
 
-                const res = await fetch(url);
-                const data = await res.json();
+                    document.getElementById('channelAvatar').src = ch.authorThumbnails?.[ch.authorThumbnails.length - 1]?.url || '';
+                    document.getElementById('channelTitle').innerText = ch.author;
+                    document.getElementById('channelStats').innerText = `${formatViews(ch.subCount)} subscribers • ${ch.latestVideos?.length || 0} videos`;
+                    document.getElementById('channelHeader').classList.remove('hidden');
+                    document.getElementById('feedTitle').innerText = 'Channel Uploads';
 
-                if (!data.items || data.items.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-400">Channel not found.</div>';
+                    if (ch.latestVideos) {
+                        renderVideoGrid(ch.latestVideos.map(v => ({
+                            videoId: v.videoId,
+                            title: v.title,
+                            channelTitle: ch.author,
+                            channelId: ch.authorId,
+                            thumbnail: v.videoThumbnails?.[0]?.url,
+                            publishedAt: v.publishedText,
+                            views: formatViews(v.viewCount)
+                        })));
+                    }
                     return;
-                }
-
-                const ch = data.items[0];
-                currentChannelId = ch.id;
-
-                document.getElementById('channelAvatar').src = ch.snippet.thumbnails.default.url;
-                document.getElementById('channelTitle').innerText = ch.snippet.title;
-                document.getElementById('channelHandle').innerText = ch.snippet.customUrl || '';
-                document.getElementById('channelStats').innerText = `${formatViews(ch.statistics.subscriberCount)} subscribers • ${formatViews(ch.statistics.videoCount)} videos`;
-                document.getElementById('channelHeader').classList.remove('hidden');
-                document.getElementById('feedTitle').innerText = 'Uploads';
-
-                const uploadsPlaylistId = ch.contentDetails.relatedPlaylists.uploads;
-                const plRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=24&playlistId=${uploadsPlaylistId}&key=${API_KEY}`);
-                const plData = await plRes.json();
-
-                if (plData.items) {
-                    renderVideoGrid(plData.items.map(item => ({
-                        videoId: item.snippet.resourceId.videoId,
-                        title: item.snippet.title,
-                        channelTitle: item.snippet.channelTitle,
-                        channelId: ch.id,
-                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
-                        publishedAt: formatDate(item.snippet.publishedAt),
-                        views: ''
-                    })));
-                }
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Failed to load channel data.</div>';
+                } catch (e) {}
             }
         }
 
+        // Render Video Grid Cards
         function renderVideoGrid(videos) {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
@@ -294,13 +271,13 @@
                 card.onclick = () => watchVideo(v.videoId);
                 card.innerHTML = `
                     <div class="aspect-video w-full bg-neutral-900 rounded-xl overflow-hidden relative border border-neutral-800 group-hover:rounded-none transition-all duration-200">
-                        <img src="${v.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${v.title}">
+                        <img src="${v.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="">
                     </div>
                     <div class="flex gap-3 items-start pt-1">
                         <div class="space-y-1 pr-2">
                             <h3 class="font-semibold text-sm line-clamp-2 text-white group-hover:text-neutral-200 leading-snug">${v.title}</h3>
-                            <p class="text-xs text-neutral-400 hover:text-white transition" onclick="event.stopPropagation(); loadChannel('${v.channelId}')">${v.channelTitle}</p>
-                            <p class="text-xs text-neutral-500">${v.views ? v.views + ' views • ' : ''}${v.publishedAt}</p>
+                            <p class="text-xs text-neutral-400 hover:text-white transition">${v.channelTitle}</p>
+                            <p class="text-xs text-neutral-500">${v.views ? v.views + ' views • ' : ''}${v.publishedAt || ''}</p>
                         </div>
                     </div>
                 `;
@@ -308,7 +285,7 @@
             });
         }
 
-        // Smart Failover Watch Function
+        // Watch Video & Stream Natively via Invidious API JSON
         async function watchVideo(videoId) {
             window.history.pushState({}, '', `?v=${videoId}`);
             document.getElementById('feedView').classList.add('hidden');
@@ -316,92 +293,76 @@
 
             const loader = document.getElementById('playerLoading');
             const statusMsg = document.getElementById('statusMsg');
-            const iframe = document.getElementById('privacyPlayer');
+            const player = document.getElementById('nativePlayer');
             
             loader.classList.remove('hidden');
-            iframe.src = '';
+            player.pause();
+            player.src = '';
 
             document.getElementById('videoTitle').innerText = 'Loading details...';
             document.getElementById('videoChannel').innerText = '';
             document.getElementById('videoViews').innerText = '';
             document.getElementById('videoDescription').innerText = '';
 
-            // Try loading through providers sequentially with automatic fallback
-            let providerIndex = 0;
-            function loadNextProvider() {
-                if (providerIndex >= EMBED_PROVIDERS.length) {
-                    statusMsg.innerText = "All privacy proxies are currently busy. Click to retry.";
-                    return;
-                }
-                statusMsg.innerText = `Connecting to privacy node ${providerIndex + 1}/${EMBED_PROVIDERS.length}...`;
-                iframe.src = EMBED_PROVIDERS[providerIndex](videoId);
-                providerIndex++;
+            // Fetch video stream and metadata
+            let streamFound = false;
+            for (const instance of INVIDIOUS_INSTANCES) {
+                try {
+                    statusMsg.innerText = `Connecting to ${instance}...`;
+                    const res = await fetch(`${instance}/api/v1/videos/${videoId}`);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+
+                    // Find progressive MP4 stream
+                    const stream = data.formatStreams?.find(s => s.container === 'mp4' && s.quality === '720p') 
+                                || data.formatStreams?.find(s => s.container === 'mp4');
+
+                    if (stream && stream.url) {
+                        player.src = stream.url;
+                        player.poster = data.videoThumbnails?.[data.videoThumbnails.length - 1]?.url || '';
+                        
+                        player.onloadeddata = () => loader.classList.add('hidden');
+                        player.play().catch(e => console.log("Autoplay restricted", e));
+
+                        // Populate metadata
+                        document.getElementById('videoTitle').innerText = data.title;
+                        document.getElementById('videoChannel').innerText = data.author;
+                        document.getElementById('videoViews').innerText = `${formatViews(data.viewCount)} views • ${data.publishedText}`;
+                        document.getElementById('videoDescription').innerText = data.description;
+
+                        renderSidebarRecommendations(data.recommendedVideos);
+                        streamFound = true;
+                        break;
+                    }
+                } catch (e) {}
             }
 
-            iframe.onload = () => {
-                // If iframe successfully loaded without blocking
-                loader.classList.add('hidden');
-            };
-
-            iframe.onerror = () => {
-                loadNextProvider();
-            };
-
-            // Kick off first provider
-            loadNextProvider();
-
-            // Fetch video metadata
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
-                const data = await res.json();
-
-                if (data.items && data.items.length > 0) {
-                    const snippet = data.items[0].snippet;
-                    const stats = data.items[0].statistics;
-
-                    currentChannelId = snippet.channelId;
-                    document.getElementById('videoTitle').innerText = snippet.title;
-                    document.getElementById('videoChannel').innerText = snippet.channelTitle;
-                    document.getElementById('videoViews').innerText = `${formatViews(stats.viewCount)} views • ${formatDate(snippet.publishedAt)}`;
-                    document.getElementById('videoDescription').innerText = snippet.description;
-
-                    fetchRelatedVideos(snippet.categoryId || '');
-                }
-            } catch (err) {
-                console.error("Failed to load video details", err);
+            if (!streamFound) {
+                statusMsg.innerText = "Error: Unable to resolve video stream from active nodes.";
             }
         }
 
-        async function fetchRelatedVideos(categoryId) {
+        function renderSidebarRecommendations(videos) {
             const sidebar = document.getElementById('relatedGrid');
-            sidebar.innerHTML = '<div class="text-xs text-neutral-500">Loading recommendations...</div>';
+            sidebar.innerHTML = '';
+            if (!videos) return;
 
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&videoCategoryId=${categoryId}&maxResults=8&key=${API_KEY}`);
-                const data = await res.json();
-
-                if (data.items) {
-                    sidebar.innerHTML = '';
-                    data.items.forEach(v => {
-                        const card = document.createElement('div');
-                        card.className = 'flex gap-2 cursor-pointer group hover:bg-ytHover p-1.5 rounded-lg transition';
-                        card.onclick = () => watchVideo(v.id);
-                        card.innerHTML = `
-                            <div class="w-40 aspect-video bg-neutral-900 rounded-lg overflow-hidden flex-shrink-0 relative">
-                                <img src="${v.snippet.thumbnails.medium?.url}" class="w-full h-full object-cover" alt="">
-                            </div>
-                            <div class="space-y-1">
-                                <h4 class="text-xs font-semibold text-white line-clamp-2 leading-tight group-hover:text-neutral-200">${v.snippet.title}</h4>
-                                <p class="text-[11px] text-neutral-400">${v.snippet.channelTitle}</p>
-                                <p class="text-[10px] text-neutral-500">${formatViews(v.statistics?.viewCount || 0)} views</p>
-                            </div>
-                        `;
-                        sidebar.appendChild(card);
-                    });
-                }
-            } catch (e) {
-                sidebar.innerHTML = '';
-            }
+            videos.forEach(v => {
+                const card = document.createElement('div');
+                card.className = 'flex gap-2 cursor-pointer group hover:bg-ytHover p-1.5 rounded-lg transition';
+                card.onclick = () => watchVideo(v.videoId);
+                card.innerHTML = `
+                    <div class="w-40 aspect-video bg-neutral-900 rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <img src="${v.videoThumbnails?.[0]?.url}" class="w-full h-full object-cover" alt="">
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="text-xs font-semibold text-white line-clamp-2 leading-tight group-hover:text-neutral-200">${v.title}</h4>
+                        <p class="text-[11px] text-neutral-400">${v.author}</p>
+                        <p class="text-[10px] text-neutral-500">${formatViews(v.viewCount)} views</p>
+                    </div>
+                `;
+                sidebar.appendChild(card);
+            });
         }
 
         function formatViews(num) {
@@ -410,12 +371,6 @@
             if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
             if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
             return num.toLocaleString();
-        }
-
-        function formatDate(isoStr) {
-            if (!isoStr) return '';
-            const date = new Date(isoStr);
-            return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
         }
     </script>
 </body>
