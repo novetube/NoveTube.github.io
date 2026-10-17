@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NoveTube</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -12,28 +11,38 @@
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0f0f0f',
-                        cardbg: '#212121',
-                        hoverbg: '#3f3f3f'
+                        ytBlack: '#0f0f0f',
+                        ytCard: '#1f1f1f',
+                        ytHover: '#272727',
+                        ytRed: '#FF0000'
                     }
                 }
             }
         }
     </script>
+    <style>
+        /* Custom YouTube Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f0f; }
+        ::-webkit-scrollbar-thumb { background: #3f3f3f; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
 </head>
-<body class="bg-darkbg text-white min-h-screen font-sans selection:bg-red-600 selection:text-white">
+<body class="bg-ytBlack text-white min-h-screen font-sans antialiased flex flex-col selection:bg-red-600 selection:text-white">
 
-    <!-- Navbar -->
-    <header class="sticky top-0 z-50 bg-darkbg/95 backdrop-blur border-b border-neutral-800 px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateHome()">
-            <span class="text-xl font-bold tracking-tighter text-red-600 flex items-center gap-1">
-                ▶ NoveTube
-            </span>
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-ytBlack/95 backdrop-blur border-b border-neutral-800 px-4 h-14 flex items-center justify-between">
+        <!-- Brand / Home Button -->
+        <div class="flex items-center gap-4 cursor-pointer" onclick="navigateHome()">
+            <div class="flex items-center gap-1 text-white font-bold text-lg tracking-tighter">
+                <div class="bg-ytRed text-white px-2 py-0.5 rounded-lg flex items-center justify-center text-xs">▶</div>
+                <span>NoveTube</span>
+            </div>
         </div>
-        
-        <!-- Search Form -->
-        <form onsubmit="handleSearch(event)" class="flex items-center w-full max-w-xl mx-4">
-            <div class="flex w-full bg-neutral-900 border border-neutral-700 rounded-l-full overflow-hidden focus-within:border-blue-500">
+
+        <!-- Search Bar -->
+        <form onsubmit="handleSearch(event)" class="flex items-center w-full max-w-2xl mx-4">
+            <div class="flex w-full bg-[#121212] border border-neutral-700 rounded-l-full overflow-hidden focus-within:border-blue-500">
                 <input type="text" id="searchInput" placeholder="Search videos or enter @channel..." 
                     class="w-full bg-transparent px-5 py-2 text-sm text-white focus:outline-none">
             </div>
@@ -41,61 +50,94 @@
                 🔍
             </button>
         </form>
+
+        <div class="w-10"></div> <!-- Spacer balance -->
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto p-4 md:p-6">
+    <!-- Main Content Grid -->
+    <main class="flex-1 max-w-[1800px] w-full mx-auto p-4 md:p-6">
         
-        <!-- View 1: Home / Search Results / Channel Uploads Grid -->
-        <section id="homeView" class="space-y-6">
-            <div id="channelHeader" class="hidden flex items-center gap-4 bg-cardbg p-4 rounded-xl border border-neutral-800">
-                <img id="channelAvatar" class="w-16 h-16 rounded-full object-cover" src="" alt="">
-                <div>
-                    <h2 id="channelTitle" class="text-xl font-bold"></h2>
-                    <p id="channelStats" class="text-sm text-neutral-400"></p>
+        <!-- View 1: Feed & Channel Pages -->
+        <section id="feedView" class="space-y-6">
+            <!-- Channel Header Banner -->
+            <div id="channelHeader" class="hidden bg-ytCard p-6 rounded-2xl border border-neutral-800 flex items-center gap-6">
+                <img id="channelAvatar" class="w-20 h-20 rounded-full border-2 border-neutral-700 object-cover" src="" alt="">
+                <div class="space-y-1">
+                    <h1 id="channelTitle" class="text-2xl font-bold"></h1>
+                    <p id="channelHandle" class="text-xs text-neutral-400 font-mono"></p>
+                    <p id="channelStats" class="text-sm text-neutral-300"></p>
                 </div>
             </div>
-            <h2 id="sectionTitle" class="text-lg font-semibold text-neutral-200">Recommended / Search Results</h2>
-            <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- Dynamic video cards go here -->
+
+            <!-- Feed Title -->
+            <h2 id="feedTitle" class="text-xl font-bold text-white tracking-wide">Trending</h2>
+
+            <!-- Video Grid -->
+            <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+                <!-- Dynamic cards populated here -->
             </div>
         </section>
 
-        <!-- View 2: Native Player View (No iFrames) -->
-        <section id="playerView" class="hidden space-y-4 max-w-5xl mx-auto">
-            <button onclick="navigateHome()" class="text-sm text-neutral-400 hover:text-white flex items-center gap-1">
-                ← Back to results
-            </button>
-            <div class="relative w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-neutral-800">
-                <!-- Native HTML5 Video Player -->
-                <video id="nativePlayer" class="w-full h-full" controls autoplay playsinline poster="">
-                    Your browser does not support the video tag.
-                </video>
+        <!-- View 2: YouTube Player View Layout -->
+        <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Left Side: Main Stream & Info -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Clean Privacy Embed Wrapper -->
+                <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800">
+                    <iframe id="privacyPlayer" class="w-full h-full border-0" allowfullscreen 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                    </iframe>
+                </div>
+
+                <!-- Video Title & Actions -->
+                <div class="space-y-2">
+                    <h1 id="videoTitle" class="text-xl font-bold text-white leading-snug"></h1>
+                    
+                    <div class="flex items-center justify-between border-b border-neutral-800 pb-4">
+                        <div id="authorBox" class="flex items-center gap-3 cursor-pointer group" onclick="loadChannel(currentChannelId)">
+                            <div class="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center font-bold text-red-500">
+                                ▶
+                            </div>
+                            <div>
+                                <h3 id="videoChannel" class="font-bold text-sm text-white group-hover:underline"></h3>
+                                <p id="videoViews" class="text-xs text-neutral-400"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description Box -->
+                    <div class="bg-ytCard p-4 rounded-xl border border-neutral-800 mt-4">
+                        <p id="videoDescription" class="text-sm text-neutral-300 whitespace-pre-line leading-relaxed text-xs md:text-sm"></p>
+                    </div>
+                </div>
             </div>
-            <div>
-                <h1 id="playerTitle" class="text-xl font-bold text-white"></h1>
-                <p id="playerChannel" class="text-sm text-neutral-400 mt-1 cursor-pointer hover:underline" onclick="loadChannel(currentChannelId)"></p>
-                <p id="playerDescription" class="text-sm text-neutral-300 mt-4 bg-cardbg p-4 rounded-xl border border-neutral-800 whitespace-pre-line"></p>
+
+            <!-- Right Side: Up Next Sidebar -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-base text-neutral-200">Up Next</h3>
+                <div id="relatedGrid" class="space-y-3">
+                    <!-- Related Video Cards -->
+                </div>
             </div>
         </section>
 
     </main>
 
-    <!-- Application Script -->
     <script>
-        // Secret placeholder injected securely during GitHub Actions build pipeline
+        // Key is securely injected by GitHub Actions secret substitution
         const API_KEY = '__YOUTUBE_API_KEY__';
 
         let currentChannelId = '';
 
-        // Initialize App on Load
+        // App Init Router
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const vId = urlParams.get('v');
             const ch = urlParams.get('ch');
 
             if (vId) {
-                playVideo(vId);
+                watchVideo(vId);
             } else if (ch) {
                 loadChannel(ch);
             } else {
@@ -105,15 +147,15 @@
 
         function navigateHome() {
             window.history.pushState({}, '', window.location.pathname);
-            document.getElementById('playerView').classList.add('hidden');
-            document.getElementById('homeView').classList.remove('hidden');
+            document.getElementById('watchView').classList.add('hidden');
+            document.getElementById('feedView').classList.remove('hidden');
             document.getElementById('channelHeader').classList.add('hidden');
-            if (!document.getElementById('videoGrid').hasChildNodes()) {
+            document.getElementById('privacyPlayer').src = '';
+            if (document.getElementById('videoGrid').children.length === 0) {
                 fetchTrendingVideos();
             }
         }
 
-        // Handle Search Submit
         function handleSearch(e) {
             e.preventDefault();
             const query = document.getElementById('searchInput').value.trim();
@@ -126,45 +168,14 @@
             }
         }
 
-        // Search YouTube Data API v3
-        async function searchVideos(query) {
-            document.getElementById('playerView').classList.add('hidden');
-            document.getElementById('homeView').classList.remove('hidden');
-            document.getElementById('channelHeader').classList.add('hidden');
-            document.getElementById('sectionTitle').innerText = `Search Results for "${query}"`;
-            
-            const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-500">Searching YouTube...</div>';
-
-            try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=16&q=${encodeURIComponent(query)}&key=${API_KEY}`);
-                const data = await res.json();
-                
-                if (data.items) {
-                    renderVideoGrid(data.items.map(item => ({
-                        videoId: item.id.videoId,
-                        title: item.snippet.title,
-                        channelTitle: item.snippet.channelTitle,
-                        channelId: item.snippet.channelId,
-                        thumbnail: item.snippet.thumbnails.high.url
-                    })));
-                } else {
-                    grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-500">No results found.</div>';
-                }
-            } catch (err) {
-                console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">Failed to fetch search results.</div>';
-            }
-        }
-
-        // Fetch Trending / Default Videos
+        // Fetch Trending Videos
         async function fetchTrendingVideos() {
-            document.getElementById('sectionTitle').innerText = 'Trending Videos';
+            document.getElementById('feedTitle').innerText = 'Trending Videos';
             const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-500">Loading videos...</div>';
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading videos...</div>';
 
             try {
-                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&chart=mostPopular&maxResults=16&regionCode=US&key=${API_KEY}`);
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&maxResults=20&regionCode=US&key=${API_KEY}`);
                 const data = await res.json();
 
                 if (data.items) {
@@ -173,23 +184,57 @@
                         title: item.snippet.title,
                         channelTitle: item.snippet.channelTitle,
                         channelId: item.snippet.channelId,
-                        thumbnail: item.snippet.thumbnails.high.url
+                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
+                        publishedAt: formatDate(item.snippet.publishedAt),
+                        views: item.statistics?.viewCount ? formatViews(item.statistics.viewCount) : ''
                     })));
-                } else {
-                    grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-500">No trending videos available.</div>';
                 }
             } catch (err) {
                 console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">Failed to load content.</div>';
+                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Failed to load content.</div>';
             }
         }
 
-        // Load Channel Info & Uploads Playlist
-        async function loadChannel(channelIdentifier) {
-            document.getElementById('playerView').classList.add('hidden');
-            document.getElementById('homeView').classList.remove('hidden');
+        // Search YouTube
+        async function searchVideos(query) {
+            document.getElementById('watchView').classList.add('hidden');
+            document.getElementById('feedView').classList.remove('hidden');
+            document.getElementById('channelHeader').classList.add('hidden');
+            document.getElementById('feedTitle').innerText = `Results for "${query}"`;
+            
             const grid = document.getElementById('videoGrid');
-            grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-500">Loading channel...</div>';
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Searching YouTube...</div>';
+
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=20&q=${encodeURIComponent(query)}&key=${API_KEY}`);
+                const data = await res.json();
+                
+                if (data.items) {
+                    renderVideoGrid(data.items.map(item => ({
+                        videoId: item.id.videoId,
+                        title: item.snippet.title,
+                        channelTitle: item.snippet.channelTitle,
+                        channelId: item.snippet.channelId,
+                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
+                        publishedAt: formatDate(item.snippet.publishedAt),
+                        views: ''
+                    })));
+                }
+            } catch (err) {
+                console.error(err);
+                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Search request failed.</div>';
+            }
+        }
+
+        // Load Channel Info & Uploads
+        async function loadChannel(channelIdentifier) {
+            window.history.pushState({}, '', `?ch=${channelIdentifier}`);
+            document.getElementById('watchView').classList.add('hidden');
+            document.getElementById('feedView').classList.remove('hidden');
+            document.getElementById('privacyPlayer').src = '';
+
+            const grid = document.getElementById('videoGrid');
+            grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-500">Loading channel...</div>';
 
             try {
                 let url = channelIdentifier.startsWith('UC') 
@@ -200,23 +245,24 @@
                 const data = await res.json();
 
                 if (!data.items || data.items.length === 0) {
-                    grid.innerHTML = '<div class="col-span-full text-center py-10 text-neutral-400">Channel not found.</div>';
+                    grid.innerHTML = '<div class="col-span-full text-center py-20 text-neutral-400">Channel not found.</div>';
                     return;
                 }
 
                 const ch = data.items[0];
                 currentChannelId = ch.id;
 
-                // Render channel profile header
+                // Render channel UI
                 document.getElementById('channelAvatar').src = ch.snippet.thumbnails.default.url;
                 document.getElementById('channelTitle').innerText = ch.snippet.title;
-                document.getElementById('channelStats').innerText = `${Number(ch.statistics.subscriberCount).toLocaleString()} subscribers • ${Number(ch.statistics.videoCount).toLocaleString()} videos`;
+                document.getElementById('channelHandle').innerText = ch.snippet.customUrl || '';
+                document.getElementById('channelStats').innerText = `${formatViews(ch.statistics.subscriberCount)} subscribers • ${formatViews(ch.statistics.videoCount)} videos`;
                 document.getElementById('channelHeader').classList.remove('hidden');
-                document.getElementById('sectionTitle').innerText = 'Channel Uploads';
+                document.getElementById('feedTitle').innerText = 'Uploads';
 
-                // Fetch channel upload items from contentDetails playlist
-                const uploadsId = ch.contentDetails.relatedPlaylists.uploads;
-                const plRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${uploadsId}&key=${API_KEY}`);
+                // Fetch upload playlist
+                const uploadsPlaylistId = ch.contentDetails.relatedPlaylists.uploads;
+                const plRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=24&playlistId=${uploadsPlaylistId}&key=${API_KEY}`);
                 const plData = await plRes.json();
 
                 if (plData.items) {
@@ -225,97 +271,127 @@
                         title: item.snippet.title,
                         channelTitle: item.snippet.channelTitle,
                         channelId: ch.id,
-                        thumbnail: item.snippet.thumbnails.high.url
+                        thumbnail: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
+                        publishedAt: formatDate(item.snippet.publishedAt),
+                        views: ''
                     })));
                 }
             } catch (err) {
                 console.error(err);
-                grid.innerHTML = '<div class="col-span-full text-center py-10 text-red-500">Failed to load channel data.</div>';
+                grid.innerHTML = '<div class="col-span-full text-center py-20 text-red-500">Failed to load channel data.</div>';
             }
         }
 
-        // Render Video Cards Grid
+        // Render Cards inside Feed Grid
         function renderVideoGrid(videos) {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
 
             videos.forEach(v => {
                 const card = document.createElement('div');
-                card.className = 'bg-cardbg rounded-xl overflow-hidden border border-neutral-800 hover:border-neutral-700 transition cursor-pointer flex flex-col';
-                card.onclick = () => playVideo(v.videoId);
+                card.className = 'group flex flex-col cursor-pointer space-y-2';
+                card.onclick = () => watchVideo(v.videoId);
                 card.innerHTML = `
-                    <div class="aspect-video w-full bg-neutral-900 overflow-hidden relative">
-                        <img src="${v.thumbnail}" class="w-full h-full object-cover hover:scale-105 transition duration-300" alt="${v.title}">
+                    <div class="aspect-video w-full bg-neutral-900 rounded-xl overflow-hidden relative border border-neutral-800 group-hover:rounded-none transition-all duration-200">
+                        <img src="${v.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${v.title}">
                     </div>
-                    <div class="p-3 flex flex-col flex-grow">
-                        <h3 class="font-semibold text-sm line-clamp-2 text-white">${v.title}</h3>
-                        <p class="text-xs text-neutral-400 mt-2 hover:text-white" onclick="event.stopPropagation(); loadChannel('${v.channelId}')">${v.channelTitle}</p>
+                    <div class="flex gap-3 items-start pt-1">
+                        <div class="space-y-1 pr-2">
+                            <h3 class="font-semibold text-sm line-clamp-2 text-white group-hover:text-neutral-200 leading-snug">${v.title}</h3>
+                            <p class="text-xs text-neutral-400 hover:text-white transition" onclick="event.stopPropagation(); loadChannel('${v.channelId}')">${v.channelTitle}</p>
+                            <p class="text-xs text-neutral-500">${v.views ? v.views + ' views • ' : ''}${v.publishedAt}</p>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        // Native HTML5 Video Stream Player (No YouTube iFrames)
-        async function playVideo(videoId) {
+        // Open Watch Screen
+        async function watchVideo(videoId) {
             window.history.pushState({}, '', `?v=${videoId}`);
-            document.getElementById('homeView').classList.add('hidden');
-            document.getElementById('playerView').classList.remove('hidden');
+            document.getElementById('feedView').classList.add('hidden');
+            document.getElementById('watchView').classList.remove('hidden');
 
-            const videoElement = document.getElementById('nativePlayer');
-            videoElement.src = '';
-            document.getElementById('playerTitle').innerText = 'Loading direct stream...';
-            document.getElementById('playerChannel').innerText = '';
-            document.getElementById('playerDescription').innerText = '';
+            // Set up privacy player embed (No ads, bypassed tracking, reliable stream playback)
+            const iframe = document.getElementById('privacyPlayer');
+            iframe.src = `https://inv.nerd-hosting.de/embed/${videoId}?autoplay=1`;
 
-            // Fetch video metadata via YouTube API
+            // Reset UI labels
+            document.getElementById('videoTitle').innerText = 'Loading details...';
+            document.getElementById('videoChannel').innerText = '';
+            document.getElementById('videoViews').innerText = '';
+            document.getElementById('videoDescription').innerText = '';
+
+            // Get video metadata from API
             try {
-                const metaRes = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}&key=${API_KEY}`);
-                const metaData = await metaRes.json();
-                if (metaData.items && metaData.items.length > 0) {
-                    const snippet = metaData.items[0].snippet;
-                    document.getElementById('playerTitle').innerText = snippet.title;
-                    document.getElementById('playerChannel').innerText = snippet.channelTitle;
-                    document.getElementById('playerChannel').onclick = () => loadChannel(snippet.channelId);
-                    document.getElementById('playerDescription').innerText = snippet.description;
-                    videoElement.poster = snippet.thumbnails.high.url;
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
+                const data = await res.json();
+
+                if (data.items && data.items.length > 0) {
+                    const snippet = data.items[0].snippet;
+                    const stats = data.items[0].statistics;
+
+                    currentChannelId = snippet.channelId;
+                    document.getElementById('videoTitle').innerText = snippet.title;
+                    document.getElementById('videoChannel').innerText = snippet.channelTitle;
+                    document.getElementById('videoViews').innerText = `${formatViews(stats.viewCount)} views • ${formatDate(snippet.publishedAt)}`;
+                    document.getElementById('videoDescription').innerText = snippet.description;
+
+                    // Fetch Up Next / Related Sidebar videos
+                    fetchRelatedVideos(snippet.categoryId || '');
+                }
+            } catch (err) {
+                console.error("Failed to load video details", err);
+            }
+        }
+
+        // Fetch Up Next Videos
+        async function fetchRelatedVideos(categoryId) {
+            const sidebar = document.getElementById('relatedGrid');
+            sidebar.innerHTML = '<div class="text-xs text-neutral-500">Loading recommendations...</div>';
+
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&chart=mostPopular&videoCategoryId=${categoryId}&maxResults=8&key=${API_KEY}`);
+                const data = await res.json();
+
+                if (data.items) {
+                    sidebar.innerHTML = '';
+                    data.items.forEach(v => {
+                        const card = document.createElement('div');
+                        card.className = 'flex gap-2 cursor-pointer group hover:bg-ytHover p-1.5 rounded-lg transition';
+                        card.onclick = () => watchVideo(v.id);
+                        card.innerHTML = `
+                            <div class="w-40 aspect-video bg-neutral-900 rounded-lg overflow-hidden flex-shrink-0 relative">
+                                <img src="${v.snippet.thumbnails.medium?.url}" class="w-full h-full object-cover" alt="">
+                            </div>
+                            <div class="space-y-1">
+                                <h4 class="text-xs font-semibold text-white line-clamp-2 leading-tight group-hover:text-neutral-200">${v.snippet.title}</h4>
+                                <p class="text-[11px] text-neutral-400">${v.snippet.channelTitle}</p>
+                                <p class="text-[10px] text-neutral-500">${formatViews(v.statistics?.viewCount || 0)} views</p>
+                            </div>
+                        `;
+                        sidebar.appendChild(card);
+                    });
                 }
             } catch (e) {
-                console.error("Failed to load metadata", e);
+                sidebar.innerHTML = '';
             }
+        }
 
-            // Extract stream URL via Invidious public instances fallback rotation
-            const instances = [
-                'https://vid.puffyan.us',
-                'https://invidious.nerqv.de',
-                'https://inv.api.store'
-            ];
+        // Utilities
+        function formatViews(num) {
+            if (!num) return '0';
+            num = parseInt(num);
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toLocaleString();
+        }
 
-            let streamUrl = null;
-            for (const instance of instances) {
-                try {
-                    const res = await fetch(`${instance}/api/v1/videos/${videoId}`);
-                    if (!res.ok) continue;
-                    const data = await res.json();
-                    
-                    const format = data.formatStreams.find(f => f.container === 'mp4' && f.qualityLabel === '720p')
-                                || data.formatStreams.find(f => f.container === 'mp4');
-                    
-                    if (format && format.url) {
-                        streamUrl = format.url;
-                        break;
-                    }
-                } catch (err) {
-                    console.warn(`Instance ${instance} failed, trying next...`);
-                }
-            }
-
-            if (streamUrl) {
-                videoElement.src = streamUrl;
-                videoElement.play().catch(err => console.log("Autoplay blocked:", err));
-            } else {
-                document.getElementById('playerTitle').innerText += ' (Direct stream format unavailable)';
-            }
+        function formatDate(isoStr) {
+            if (!isoStr) return '';
+            const date = new Date(isoStr);
+            return date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
         }
     </script>
 </body>
