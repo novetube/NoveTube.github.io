@@ -75,14 +75,18 @@
             </div>
         </section>
 
-        <!-- View 2: Clean Privacy Watch Layout -->
+        <!-- View 2: Watch Layout -->
         <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             
             <!-- Left Side: Player & Info -->
             <div class="lg:col-span-2 space-y-4">
-                <!-- Clean Video Player Box -->
-                <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800">
-                    <iframe id="privacyPlayer" class="w-full h-full border-0" allowfullscreen 
+                <!-- Video Player Box with Loading Overlay -->
+                <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800 flex items-center justify-center">
+                    <div id="playerLoading" class="absolute inset-0 bg-black flex flex-col items-center justify-center space-y-3 z-10">
+                        <div class="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                        <p id="statusMsg" class="text-xs text-neutral-400 font-mono">Connecting to privacy stream...</p>
+                    </div>
+                    <iframe id="privacyPlayer" class="w-full h-full border-0 relative z-0" allowfullscreen 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                     </iframe>
                 </div>
@@ -126,11 +130,12 @@
 
         let currentChannelId = '';
 
-        // Curated list of reliable privacy embed instances
-        const EMBED_INSTANCES = [
+        // Robust, distributed pool of privacy embed generators
+        const EMBED_PROVIDERS = [
             id => `https://piped.video/embed/${id}?autoplay=1`,
             id => `https://vid.puffyan.us/embed/${id}?autoplay=1`,
-            id => `https://invidious.protokolla.fi/embed/${id}?autoplay=1`
+            id => `https://inv.nadeko.net/embed/${id}?autoplay=1`,
+            id => `https://invidious.nerdvpn.de/embed/${id}?autoplay=1`
         ];
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -303,20 +308,49 @@
             });
         }
 
+        // Smart Failover Watch Function
         async function watchVideo(videoId) {
             window.history.pushState({}, '', `?v=${videoId}`);
             document.getElementById('feedView').classList.add('hidden');
             document.getElementById('watchView').classList.remove('hidden');
 
-            // Load clean embed from privacy instances
+            const loader = document.getElementById('playerLoading');
+            const statusMsg = document.getElementById('statusMsg');
             const iframe = document.getElementById('privacyPlayer');
-            iframe.src = EMBED_INSTANCES[0](videoId);
+            
+            loader.classList.remove('hidden');
+            iframe.src = '';
 
             document.getElementById('videoTitle').innerText = 'Loading details...';
             document.getElementById('videoChannel').innerText = '';
             document.getElementById('videoViews').innerText = '';
             document.getElementById('videoDescription').innerText = '';
 
+            // Try loading through providers sequentially with automatic fallback
+            let providerIndex = 0;
+            function loadNextProvider() {
+                if (providerIndex >= EMBED_PROVIDERS.length) {
+                    statusMsg.innerText = "All privacy proxies are currently busy. Click to retry.";
+                    return;
+                }
+                statusMsg.innerText = `Connecting to privacy node ${providerIndex + 1}/${EMBED_PROVIDERS.length}...`;
+                iframe.src = EMBED_PROVIDERS[providerIndex](videoId);
+                providerIndex++;
+            }
+
+            iframe.onload = () => {
+                // If iframe successfully loaded without blocking
+                loader.classList.add('hidden');
+            };
+
+            iframe.onerror = () => {
+                loadNextProvider();
+            };
+
+            // Kick off first provider
+            loadNextProvider();
+
+            // Fetch video metadata
             try {
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
                 const data = await res.json();
