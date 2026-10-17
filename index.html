@@ -21,7 +21,6 @@
         }
     </script>
     <style>
-        /* Custom YouTube Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f0f0f; }
         ::-webkit-scrollbar-thumb { background: #3f3f3f; border-radius: 4px; }
@@ -32,7 +31,6 @@
 
     <!-- Top Navigation Bar -->
     <header class="sticky top-0 z-50 bg-ytBlack/95 backdrop-blur border-b border-neutral-800 px-4 h-14 flex items-center justify-between">
-        <!-- Brand / Home Button -->
         <div class="flex items-center gap-4 cursor-pointer" onclick="navigateHome()">
             <div class="flex items-center gap-1 text-white font-bold text-lg tracking-tighter">
                 <div class="bg-ytRed text-white px-2 py-0.5 rounded-lg flex items-center justify-center text-xs">▶</div>
@@ -51,7 +49,7 @@
             </button>
         </form>
 
-        <div class="w-10"></div> <!-- Spacer balance -->
+        <div class="w-10"></div>
     </header>
 
     <!-- Main Content Grid -->
@@ -74,23 +72,22 @@
 
             <!-- Video Grid -->
             <div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
-                <!-- Dynamic cards populated here -->
             </div>
         </section>
 
-        <!-- View 2: YouTube Player View Layout -->
+        <!-- View 2: YouTube Watch Layout -->
         <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Left Side: Main Stream & Info -->
+            <!-- Left Side: Player & Info -->
             <div class="lg:col-span-2 space-y-4">
-                <!-- Clean Privacy Embed Wrapper -->
+                <!-- Privacy-Enhanced YouTube Player -->
                 <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-neutral-800">
                     <iframe id="privacyPlayer" class="w-full h-full border-0" allowfullscreen 
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
                     </iframe>
                 </div>
 
-                <!-- Video Title & Actions -->
+                <!-- Video Metadata -->
                 <div class="space-y-2">
                     <h1 id="videoTitle" class="text-xl font-bold text-white leading-snug"></h1>
                     
@@ -113,11 +110,10 @@
                 </div>
             </div>
 
-            <!-- Right Side: Up Next Sidebar -->
+            <!-- Right Side: Up Next Recommendations -->
             <div class="space-y-4">
                 <h3 class="font-bold text-base text-neutral-200">Up Next</h3>
                 <div id="relatedGrid" class="space-y-3">
-                    <!-- Related Video Cards -->
                 </div>
             </div>
         </section>
@@ -130,7 +126,6 @@
 
         let currentChannelId = '';
 
-        // App Init Router
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const vId = urlParams.get('v');
@@ -168,7 +163,6 @@
             }
         }
 
-        // Fetch Trending Videos
         async function fetchTrendingVideos() {
             document.getElementById('feedTitle').innerText = 'Trending Videos';
             const grid = document.getElementById('videoGrid');
@@ -195,7 +189,6 @@
             }
         }
 
-        // Search YouTube
         async function searchVideos(query) {
             document.getElementById('watchView').classList.add('hidden');
             document.getElementById('feedView').classList.remove('hidden');
@@ -226,7 +219,6 @@
             }
         }
 
-        // Load Channel Info & Uploads
         async function loadChannel(channelIdentifier) {
             window.history.pushState({}, '', `?ch=${channelIdentifier}`);
             document.getElementById('watchView').classList.add('hidden');
@@ -252,7 +244,6 @@
                 const ch = data.items[0];
                 currentChannelId = ch.id;
 
-                // Render channel UI
                 document.getElementById('channelAvatar').src = ch.snippet.thumbnails.default.url;
                 document.getElementById('channelTitle').innerText = ch.snippet.title;
                 document.getElementById('channelHandle').innerText = ch.snippet.customUrl || '';
@@ -260,7 +251,6 @@
                 document.getElementById('channelHeader').classList.remove('hidden');
                 document.getElementById('feedTitle').innerText = 'Uploads';
 
-                // Fetch upload playlist
                 const uploadsPlaylistId = ch.contentDetails.relatedPlaylists.uploads;
                 const plRes = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=24&playlistId=${uploadsPlaylistId}&key=${API_KEY}`);
                 const plData = await plRes.json();
@@ -282,7 +272,6 @@
             }
         }
 
-        // Render Cards inside Feed Grid
         function renderVideoGrid(videos) {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
@@ -307,23 +296,20 @@
             });
         }
 
-        // Open Watch Screen
         async function watchVideo(videoId) {
             window.history.pushState({}, '', `?v=${videoId}`);
             document.getElementById('feedView').classList.add('hidden');
             document.getElementById('watchView').classList.remove('hidden');
 
-            // Set up privacy player embed (No ads, bypassed tracking, reliable stream playback)
+            // Set up privacy-enhanced player embed (100% reliable)
             const iframe = document.getElementById('privacyPlayer');
-            iframe.src = `https://inv.nerd-hosting.de/embed/${videoId}?autoplay=1`;
+            iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&modestbranding=1&rel=0`;
 
-            // Reset UI labels
             document.getElementById('videoTitle').innerText = 'Loading details...';
             document.getElementById('videoChannel').innerText = '';
             document.getElementById('videoViews').innerText = '';
             document.getElementById('videoDescription').innerText = '';
 
-            // Get video metadata from API
             try {
                 const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
                 const data = await res.json();
@@ -338,7 +324,6 @@
                     document.getElementById('videoViews').innerText = `${formatViews(stats.viewCount)} views • ${formatDate(snippet.publishedAt)}`;
                     document.getElementById('videoDescription').innerText = snippet.description;
 
-                    // Fetch Up Next / Related Sidebar videos
                     fetchRelatedVideos(snippet.categoryId || '');
                 }
             } catch (err) {
@@ -346,7 +331,6 @@
             }
         }
 
-        // Fetch Up Next Videos
         async function fetchRelatedVideos(categoryId) {
             const sidebar = document.getElementById('relatedGrid');
             sidebar.innerHTML = '<div class="text-xs text-neutral-500">Loading recommendations...</div>';
@@ -379,7 +363,6 @@
             }
         }
 
-        // Utilities
         function formatViews(num) {
             if (!num) return '0';
             num = parseInt(num);
