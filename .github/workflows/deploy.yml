@@ -1,64 +1,32 @@
-name: Deploy NoveTube to GitHub Pages
-
+name: Deploy NoveTube
 on:
   push:
-    branches:
-      - main
-
+    branches: [ main ]
+  workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Inject YouTube API Key
-        env:
-          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-        run: |
-          if [ -z "$YOUTUBE_API_KEY" ]; then
-            echo "::error::The YOUTUBE_API_KEY secret is missing or empty."
-            exit 1
-          fi
-
-          python3 - <<'PY'
-          import os
-          from pathlib import Path
-
-          path = Path("index.html")
-          html = path.read_text()
-          placeholder = "__YOUTUBE_API_KEY__"
-
-          if placeholder not in html:
-              raise SystemExit("API key placeholder not found in index.html")
-
-          path.write_text(
-              html.replace(placeholder, os.environ["YOUTUBE_API_KEY"])
-          )
-          print("YouTube API key injected successfully.")
-          PY
-
+      - name: Inject API Key
+        run: sed -i "s/__YOUTUBE_API_KEY__/${{ secrets.YOUTUBE_API_KEY }}/g" index.html
       - name: Setup Pages
         uses: actions/configure-pages@v4
-
-      - name: Upload Artifact
+      - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
-
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
