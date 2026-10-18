@@ -21,14 +21,14 @@ jobs:
         uses: actions/checkout@v4
       - name: Inject API Key
         env:
-          KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          KEY: ${{ secrets.YouTube_API }}
         run: |
           python3 -c '
           import os
           key = os.environ.get("KEY", "")
           with open("index.html", "r") as f:
               c = f.read()
-          c = c.replace("AIzaSyCzYvFAl4McevfLC3yvBWgOeBWwzvOEsFg", key).replace("__YOUTUBE_API_KEY__", key)
+          c = c.replace("__YOUTUBE_API_KEY__", key)
           with open("index.html", "w") as f:
               f.write(c)
           '
