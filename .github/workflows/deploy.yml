@@ -20,7 +20,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Inject API Key
-        run: sed -i "s/__YOUTUBE_API_KEY__/${{ secrets.YOUTUBE_API_KEY }}/g" index.html
+        env:
+          KEY: ${{ secrets.YOUTUBE_API_KEY }}
+        run: |
+          python3 -c '
+          import os
+          key = os.environ.get("KEY", "")
+          with open("index.html", "r") as f:
+              c = f.read()
+          c = c.replace("AIzaSyCzYvFAl4McevfLC3yvBWgOeBWwzvOEsFg", key).replace("__YOUTUBE_API_KEY__", key)
+          with open("index.html", "w") as f:
+              f.write(c)
+          '
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
