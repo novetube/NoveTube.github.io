@@ -10,27 +10,32 @@
 <button id="homeButton" class="flex items-center gap-2 shrink-0"><span class="bg-ytRed text-white px-2 py-1 rounded text-xs font-bold">▶</span><span class="font-bold text-lg">NoveTube</span></button>
 <form id="searchForm" class="flex items-center w-full max-w-2xl"><input id="searchInput" type="search" placeholder="Search videos..." class="w-full bg-[#121212] border border-neutral-700 rounded-l-full px-5 py-2 text-sm focus:outline-none"><button class="bg-neutral-800 border border-l-0 border-neutral-700 px-5 py-2 rounded-r-full hover:bg-neutral-700">⌕</button></form>
 </header>
-<main class="flex-1 max-w-[1800px] w-full mx-auto p-6">
+<main class="flex-1 max-w-[1800px] w-full mx-auto p-6 space-y-4">
+<div id="debugLog" class="hidden bg-neutral-900 border border-neutral-800 p-3 rounded-lg text-xs font-mono text-green-400 max-h-32 overflow-y-auto"></div>
 <section id="feedView" class="space-y-6"><h2 id="feedTitle" class="text-xl font-bold">Trending</h2><div id="videoGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div></section>
 <section id="watchView" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
 <div class="lg:col-span-2 space-y-4">
 <div class="relative w-full aspect-video bg-black rounded-2xl overflow-hidden border border-neutral-800"><video id="directPlayer" controls autoplay class="w-full h-full"></video></div>
-<h1 id="videoTitle" class="text-xl font-bold">Loading...</h1><p id="videoDescription" class="text-sm text-neutral-400 bg-ytCard p-4 rounded-xl border border-neutral-800"></p>
+<h1 id="videoTitle" class="text-xl font-bold">Loading...</h1>
 </div>
-<aside class="space-y-4"><h2 class="font-bold">More videos</h2><div id="relatedGrid" class="space-y-3"></div></aside>
 </section>
 </main>
 <script>
 "use strict";
 const API_KEY="__YOUTUBE_API_KEY__",API_BASE="https://www.googleapis.com/youtube/v3",$ = id=>document.getElementById(id);
 const INSTANCES=["https://inv.nadeko.net","https://invidious.nerdvpn.de","https://yt.chocolatemoo53.com","https://invidious.tiekoetter.com"];
-async function apiReq(e,p={}){if(!API_KEY||API_KEY==="__YOUTUBE_API_KEY__")throw new Error("Missing API Key");const u=new URL(`${API_BASE}/${e}`);Object.entries({...p,key:API_KEY}).forEach(([k,v])=>v&&u.searchParams.set(k,v));const r=await fetch(u),d=await r.json();if(!r.ok||d.error)throw new Error(d?.error?.message||"Error");return d;}
-async function getStream(id){for(const host of INSTANCES){try{const r=await fetch(`${host}/api/v1/videos/${id}`),d=await r.json(),s=(d.formatStreams||[]).find(f=>f.container==='mp4')||(d.formatStreams||[])[0];if(s&&s.url)return s.url;}catch{continue;}}return null;}
-function render(videos){const g=$("videoGrid");g.innerHTML="";videos.forEach(v=>{const d=document.createElement("div");d.className="cursor-pointer space-y-2";d.innerHTML=`<div class="aspect-video bg-neutral-800 rounded-xl overflow-hidden"><img src="${v.thumb}" class="w-full h-full object-cover"></div><h3 class="font-semibold text-sm line-clamp-2">${v.title}</h3><p class="text-xs text-neutral-400">${v.channel}</p>`;d.onclick=()=>play(v.id,v.title);g.appendChild(d);});}
-async function loadTrending(){$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");$("videoGrid").innerHTML="Loading...";try{const d=await apiReq("videos",{part:"snippet",chart:"mostPopular",maxResults:24,regionCode:"US"});render((d.items\vert{}\vert{}[]).map(i=>({id:i.id,title:i.snippet.title,channel:i.snippet.channelTitle,thumb:i.snippet.thumbnails?.high?.url})));}catch(e){$("videoGrid").innerHTML=e.message;}}
-async function play(id,title){$("feedView").classList.add("hidden");$("watchView").classList.remove("hidden");$("videoTitle").textContent=title\vert{}\vert{}"Loading...";$("directPlayer").src="";const url=await getStream(id);if(url)$("directPlayer").src=url;else $("videoTitle").textContent="Stream offline, try another video.";}
-$("homeButton").onclick=loadTrending;
-$("searchForm").onsubmit=async e=>{e.preventDefault();const q=$("searchInput").value.trim();if(!q)return;$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");$("videoGrid").innerHTML="Searching...";try{const d=await apiReq("search",{part:"snippet",type:"video",maxResults:24,q:q});render((d.items\vert{}\vert{}[]).map(i=>({id:i.id.videoId,title:i.snippet.title,channel:i.snippet.channelTitle,thumb:i.snippet.thumbnails?.high?.url})));}catch(e){$("videoGrid").innerHTML=e.message;}};
+function log(msg){const d=$("debugLog");d.classList.remove("hidden");d.innerHTML+=`<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;d.scrollTop=d.scrollHeight;}
+function getQueue(){return JSON.parse(localStorage.getItem("novetube_queue")||"[]");}
+function saveQueue(q){localStorage.setItem("novetube_queue",JSON.stringify(q));}
+function addToQueue(v){let q=getQueue();if(!q.some(x=>x.id===v.id)){q.push(v);saveQueue(q);log(`Added to queue: ${v.title}`);}}
+function removeFromQueue(id){let q=getQueue().filter(x=>x.id!==id);saveQueue(q);log(`Removed from queue ID: ${id}`);}
+async function apiReq(e,p={}){if(!API_KEY||API_KEY==="__YOUTUBE_API_KEY__"){log("Error: API_KEY missing.");throw new Error("Missing API Key");}const u=new URL(`${API_BASE}/${e}`);Object.entries({...p,key:API_KEY}).forEach(([k,v])=>v&&u.searchParams.set(k,v));log(`Fetching YouTube API: ${e}`);const r=await fetch(u),d=await r.json();if(!r.ok||d.error){log(`API Error: ${d?.error?.message}`);throw new Error(d?.error?.message||"Error");}return d;}
+async function getStream(id){log(`Extracting stream for ID: ${id}`);for(const host of INSTANCES){try{log(`Trying instance: ${host}`);const r=await fetch(`${host}/api/v1/videos/${id}`),d=await r.json(),s=(d.formatStreams||[]).find(f=>f.container==='mp4')||(d.formatStreams||[])[0];if(s&&s.url){log("Stream successfully extracted.");return s.url;}}catch(e){log(`Failed instance ${host}: ${e.message}`);continue;}}log("All stream proxies failed.");return null;}
+function renderQueue(){const g=$("videoGrid"),q=getQueue();g.innerHTML="";if(!q.length){g.innerHTML="Queue empty. Load trending or search videos!";return;}q.forEach(v=>{const d=document.createElement("div");d.className="cursor-pointer space-y-2";d.innerHTML=`<div class="aspect-video bg-neutral-800 rounded-xl overflow-hidden"><img src="${v.thumb}" class="w-full h-full object-cover"></div><h3 class="font-semibold text-sm line-clamp-2">${v.title}</h3><p class="text-xs text-neutral-400">${v.channel}</p>`;d.onclick=()=>play(v.id,v.title);g.appendChild(d);});}
+async function loadTrending(){$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");$("videoGrid").innerHTML="Loading trending videos...";log("Loading trending videos via YouTube API...");try{const d=await apiReq("videos",{part:"snippet",chart:"mostPopular",maxResults:24,regionCode:"US"});const vids=(d.items||[]).map(i=>({id:i.id,title:i.snippet.title,channel:i.snippet.channelTitle,thumb:i.snippet.thumbnails?.high?.url}));vids.forEach(addToQueue);renderQueue();}catch(e){$("videoGrid").innerHTML=e.message;}}
+async function play(id,title){$("feedView").classList.add("hidden");$("watchView").classList.remove("hidden");$("videoTitle").textContent=title||"Loading...";const p=$("directPlayer");p.src="";const url=await getStream(id);if(url){p.src=url;p.onended=()=>{log(`Video ended: ${id}`);removeFromQueue(id);$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");renderQueue();};}else $("videoTitle").textContent="Stream offline, try another video.";}
+$("homeButton").onclick=()=>{($("watchView").classList.add("hidden"),$("feedView").classList.remove("hidden"),loadTrending());};
+$("searchForm").onsubmit=async e=>{e.preventDefault();const q=$("searchInput").value.trim();if(!q)return;$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");$("videoGrid").innerHTML="Searching...";log(`Searching query: ${q}`);try{const d=await apiReq("search",{part:"snippet",type:"video",maxResults:12,q:q});const vids=(d.items||[]).map(i=>({id:i.id.videoId,title:i.snippet.title,channel:i.snippet.channelTitle,thumb:i.snippet.thumbnails?.high?.url}));vids.forEach(addToQueue);renderQueue();}catch(e){$("videoGrid").innerHTML=e.message;}};
 loadTrending();
 </script>
 </body>
