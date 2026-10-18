@@ -1,7 +1,12 @@
 <!DOCTYPE html>
 <html lang="en" class="dark bg-black">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>NoveTube</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>NoveTube</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='25' fill='%23ff0000'/%3E%3Cpolygon points='40,30 75,50 40,70' fill='%23ffffff'/%3E%3C/svg%3E">
 <script src="https://cdn.tailwindcss.com"></script>
 <script>tailwind.config={darkMode:"class",theme:{extend:{colors:{ytBlack:"#0a0a0a",ytCard:"#171717",ytRed:"#ff0000"}}}};</script>
@@ -32,7 +37,7 @@
 const API_KEY="__YOUTUBE_API_KEY__",API_BASE="https://www.googleapis.com/youtube/v3",$ = id=>document.getElementById(id);
 function escapeHtml(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function setApiStatus(ok,msg){const b=$("apiStatusBadge");if(ok){b.className="text-xs px-3 py-1.5 rounded-full font-bold border border-emerald-500/30 bg-emerald-950/40 text-emerald-400 flex items-center gap-2 shadow-sm";b.innerHTML='<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>API RUNNING</span>';}else{b.className="text-xs px-3 py-1.5 rounded-full font-bold border border-rose-500/30 bg-rose-950/40 text-rose-400 flex items-center gap-2 shadow-sm";b.innerHTML=`<span class="w-2 h-2 rounded-full bg-rose-500"></span><span>API OFFLINE (${escapeHtml(msg||"KEY MISSING")})</span>`;}}
-function checkInitialState(){if(!API_KEY||API_KEY==="__YOUTUBE_API_KEY__"||API_KEY.trim()===""){setApiStatus(false,"NO KEY INJECTED");return false;}return true;}
+function checkInitialState(){if(!API_KEY||API_KEY==="__YOUTUBE_API_KEY__"||!API_KEY.trim()){setApiStatus(false,"NO KEY INJECTED");return false;}return true;}
 function getQueue(){return JSON.parse(localStorage.getItem("novetube_queue")||"[]");}
 function saveQueue(q){localStorage.setItem("novetube_queue",JSON.stringify(q));updateBadge();}
 function addToQueue(v){let q=getQueue();if(!q.some(x=>x.id===v.id)){q.push(v);saveQueue(q);}}
@@ -47,7 +52,7 @@ function renderUpNext(){const q=getQueue(),u=$("upNextGrid");u.innerHTML="";if(!
 $("homeButton").onclick=()=>{($("watchView").classList.add("hidden"),$("feedView").classList.remove("hidden"),loadTrending());};
 $("clearQueueBtn").onclick=()=>{saveQueue([]);renderFeed([]);};
 $("searchForm").onsubmit=async e=>{e.preventDefault();const q=$("searchInput").value.trim();if(!q)return;$("watchView").classList.add("hidden");$("feedView").classList.remove("hidden");$("videoGrid").innerHTML="<p class='col-span-full text-center py-12 text-neutral-400 animate-pulse font-medium'>Searching...</p>";try{const d=await apiReq("search",{part:"snippet",type:"video",maxResults:20,q:q});renderFeed((d.items||[]).map(i=>({id:i.id.videoId,title:i.snippet.title,channel:i.snippet.channelTitle,thumb:i.snippet.thumbnails?.high?.url||i.snippet.thumbnails?.default?.url})));}catch(e){$("videoGrid").innerHTML=`<p class='col-span-full text-center py-12 text-rose-400 font-medium'>${escapeHtml(e.message)}</p>`;}};
-updateBadge();checkInitialState();loadTrending();
+updateBadge();if(checkInitialState()){loadTrending();}
 </script>
 </body>
 </html>
