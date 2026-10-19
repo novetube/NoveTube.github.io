@@ -1,18 +1,43 @@
-name: Deploy to GitHub Pages
+name: Deploy NoveTube
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
 jobs:
-  build-and-deploy:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Inject YouTube API Secret
+      - name: Inject API Key
+        env:
+          KEY: ${{ secrets.YouTube_API }}
         run: |
-          sed -i 's|__YOUTUBE_API_KEY__|${{ secrets.YOUTUBE_API }}|g' index.html
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+          python3 -c '
+          import os
+          key = os.environ.get("KEY", "")
+          with open("index.html", "r") as f:
+              c = f.read()
+          c = c.replace("__YOUTUBE_API_KEY__", key)
+          with open("index.html", "w") as f:
+              f.write(c)
+          '
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: .
-          
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
