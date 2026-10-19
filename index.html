@@ -1,8 +1,9 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NoveTube</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}:root{--bg:#0f0f0f;--bg2:#212121;--bg3:#272727;--bg4:#1e1e1e;--text:#f1f1f1;--text2:#aaaaaa;--text3:#717171;--border:#3f3f3f;--red:#ff0000;--red2:#cc0000;--hover:#272727;--sidebar:240px;--hh:56px;--radius:12px;}html{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;font-size:14px;}body{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}button{background:none;border:none;cursor:pointer;color:inherit;font-family:inherit;font-size:inherit;}input{font-family:inherit;font-size:inherit;}img{display:block;max-width:100%;}svg{flex-shrink:0;display:block;}::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#3f3f3f;border-radius:4px;}::-webkit-scrollbar-thumb:hover{background:#555;}#hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--hh);background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:8px;border-bottom:1px solid #1a1a1a;}.hl{display:flex;align-items:center;gap:2px;}#menuBtn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text);transition:background .1s;margin-right:10px;}#menuBtn:hover{background:var(--hover);}.logo{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:4px 8px;border-radius:6px;transition:background .1s;}.logo:hover{background:var(--hover);}.logo-mark{width:32px;height:22px;background:var(--red);border-radius:4px;display:flex;align-items:center;justify-content:center;}.logo-name{font-size:19px;font-weight:700;letter-spacing:-.5px;line-height:1;color:var(--text);}.hc{display:flex;align-items:center;gap:8px;flex:1;max-width:720px;margin:0 auto;}#searchForm{display:flex;flex:1;height:40px;}#searchInput{flex:1;height:100%;padding:0 16px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-right:none;border-radius:40px 0 0 40px;outline:none;font-size:15px;}#searchInput:focus{border-color:#1c62b9;}#searchBtn{width:64px;height:100%;flex-shrink:0;background:var(--bg2);border:1px solid var(--border);border-left:none;border-radius:0 40px 40px 0;display:flex;align-items:center;justify-content:center;color:var(--text);}#layout{display:flex;margin-top:var(--hh);}#sidebar{width:var(--sidebar);min-width:var(--sidebar);position:fixed;top:var(--hh);left:0;bottom:0;overflow-y:auto;background:var(--bg);padding:12px 0 24px;z-index:100;}.si{display:flex;align-items:center;gap:20px;padding:0 16px;height:40px;border-radius:10px;margin:0 8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);} .si:hover{background:var(--hover);}.si.active{background:var(--bg3);}#main{margin-left:var(--sidebar);flex:1;padding:20px 24px 48px;min-height:calc(100vh - var(--hh));background:var(--bg);}.sdiv{border:none;border-top:1px solid var(--border);margin:10px 0;}#videoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px 16px;}.vc{cursor:pointer;}.vthumb{position:relative;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden;margin-bottom:10px;}.vthumb img{width:100%;height:100%;object-fit:cover;}.vmeta{display:flex;gap:12px;padding:0 2px;}.vavatar{width:36px;height:36px;border-radius:50%;background:var(--bg3);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--text2);}.vavatar img{width:100%;height:100%;object-fit:cover;}.vtitle{font-size:14px;font-weight:500;line-height:1.4;color:var(--text);margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}.vchan{font-size:13px;color:var(--text2);margin-bottom:2px;}.vstats{font-size:12px;color:var(--text3);}#viewContainer{display:none;width:100%;height:calc(100vh - 56px);justify-content:center;align-items:center;background:#000;}.shorts-player{width:360px;height:640px;background:#111;border-radius:16px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.8);} .shorts-player iframe{width:100%;height:100%;border:none;}</style></head><body><header id="hdr"><div class="hl"><button id="menuBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button><div class="logo" id="homeBtn"><div class="logo-mark"><svg width="16" height="12" viewBox="0 0 16 12" fill="none"><polygon points="5,0 16,6 5,12" fill="#fff"/></svg></div><span class="logo-name">NoveTube</span></div></div><div class="hc"><form id="searchForm"><input id="searchInput" type="search" placeholder="Search…"><button id="searchBtn" type="submit"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button></form></div><div id="apiStatus" style="font-size:11px;padding:5px 10px;background:#212121;border-radius:6px;color:#aaa">Checking...</div></header><div id="layout"><nav id="sidebar"><div class="si active" id="navHome">Home</div><div class="si" id="navShorts">Shorts</div><hr class="sdiv"><div class="si" id="navChan">@debugy/videos</div></nav><main id="main"><div id="feedView"><div id="videoGrid"></div><div id="loadingMore" style="text-align:center;padding:20px;color:#aaa;display:none">Loading more vids...</div></div><div id="viewContainer"></div></main></div><script>"use strict";
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NoveTube</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"><style>*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}:root{--bg:#0f0f0f;--bg2:#212121;--bg3:#272727;--text:#f1f1f1;--text2:#aaa;--text3:#717171;--border:#3f3f3f;--red:#ff0000;--hover:#272727;--sidebar:240px;--hh:56px;--radius:12px;}html{background:var(--bg);color:var(--text);font-family:'Roboto',sans-serif;font-size:14px;}body{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);}button{background:none;border:none;cursor:pointer;color:inherit;font-family:inherit;font-size:inherit;}input{font-family:inherit;font-size:inherit;}img{display:block;max-width:100%;}svg{flex-shrink:0;display:block;}::-webkit-scrollbar{width:8px;height:8px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#3f3f3f;border-radius:4px;}#hdr{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--hh);background:var(--bg);display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:8px;border-bottom:1px solid #222;}.hl{display:flex;align-items:center;gap:2px;}#menuBtn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text);transition:background .1s;margin-right:10px;}#menuBtn:hover{background:var(--hover);}.logo{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;padding:4px 8px;border-radius:6px;}.logo-mark{width:28px;height:20px;background:var(--red);border-radius:4px;display:flex;align-items:center;justify-content:center;}.logo-name{font-size:18px;font-weight:700;letter-spacing:-.5px;color:var(--text);}.hc{display:flex;align-items:center;gap:8px;flex:1;max-width:600px;margin:0 auto;}#searchForm{display:flex;flex:1;height:40px;}#searchInput{flex:1;height:100%;padding:0 16px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-right:none;border-radius:40px 0 0 40px;outline:none;font-size:15px;}#searchInput:focus{border-color:#1c62b9;}#searchBtn{width:64px;height:100%;background:var(--bg2);border:1px solid var(--border);border-left:none;border-radius:0 40px 40px 0;display:flex;align-items:center;justify-content:center;color:var(--text);}.hr{display:flex;align-items:center;gap:12px;}.ibtn{width:40px;height:40px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text);cursor:pointer;}.ibtn:hover{background:var(--bg3);}.avatar{width:32px;height:32px;border-radius:50%;background:#555;overflow:hidden;}.avatar img{width:100%;height:100%;object-fit:cover;}#layout{display:flex;margin-top:var(--hh);}#sidebar{width:var(--sidebar);min-width:var(--sidebar);position:fixed;top:var(--hh);left:0;bottom:0;overflow-y:auto;background:var(--bg);padding:12px 12px 24px;z-index:100;}.si{display:flex;align-items:center;gap:24px;padding:0 12px;height:40px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:400;color:var(--text);margin-bottom:2px;}.si:hover{background:var(--hover);}.si.active{background:var(--bg3);font-weight:500;}.sdiv{border:none;border-top:1px solid var(--border);margin:12px 0;}.ssec{padding:4px 12px 8px;font-size:14px;font-weight:500;color:var(--text);}.sub-item{display:flex;align-items:center;gap:16px;padding:0 12px;height:36px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--text);}.sub-item:hover{background:var(--hover);}.sub-dot{width:6px;height:6px;background:#3ea6ff;border-radius:50%;margin-left:auto;}#main{margin-left:var(--sidebar);flex:1;padding:24px;background:var(--bg);min-height:calc(100vh - var(--hh));}#chips{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;margin-bottom:24px;scrollbar-width:none;}#chips::-webkit-scrollbar{display:none;}.chip{flex-shrink:0;padding:0 12px;height:32px;background:var(--bg2);border-radius:8px;font-size:14px;font-weight:400;display:flex;align-items:center;cursor:pointer;color:var(--text);border:none;}.chip:hover{background:var(--bg3);}.chip.active{background:var(--text);color:var(--bg);}.sec-title{font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;margin:24px 0 16px;}#videoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px 16px;margin-bottom:32px;}.vc{cursor:pointer;}.vthumb{position:relative;aspect-ratio:16/9;background:#000;border-radius:var(--radius);overflow:hidden;margin-bottom:12px;}.vthumb img{width:100%;height:100%;object-fit:cover;}.vmeta{display:flex;gap:12px;}.vavatar{width:36px;height:36px;border-radius:50%;background:var(--bg3);flex-shrink:0;overflow:hidden;}.vavatar img{width:100%;height:100%;object-fit:cover;}.vtitle{font-size:15px;font-weight:500;line-height:1.4;color:var(--text);margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}.vchan{font-size:13px;color:var(--text2);margin-bottom:2px;}.vstats{font-size:13px;color:var(--text2);}#shortsGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;}#shortsGrid .sh-card{cursor:pointer;}.sh-thumb{aspect-ratio:9/16;background:#000;border-radius:var(--radius);overflow:hidden;position:relative;margin-bottom:8px;}.sh-thumb img{width:100%;height:100%;object-fit:cover;}.sh-title{font-size:14px;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--text);}</style></head><body><header id="hdr"><div class="hl"><button id="menuBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button><div class="logo" id="homeBtn"><div class="logo-mark"><svg width="14" height="10" viewBox="0 0 16 12" fill="none"><polygon points="5,0 16,6 5,12" fill="#fff"/></svg></div><span class="logo-name">NoveTube</span></div></div><div class="hc"><form id="searchForm"><input id="searchInput" type="search" placeholder="Search"><button id="searchBtn" type="submit"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg></button></form></div><div class="hr"><div class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M14 13h-3v3H9v-3H6v-2h3V8h2v3h3v2zm3-7H3v12h14v-3h2V6h-2z"/></svg></div><div class="ibtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div><div class="avatar"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"></div></div></header><div id="layout"><nav id="sidebar"><div class="si active"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4 21V10.08l8-6.92 8 6.92V21h-5v-6h-6v6H4z"/></svg>Home</div><div class="si"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17.77 10.32l-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.46.93 2.68 2.22 3.18l1.25.5-1.43.76c-1.84.96-2.53 3.23-1.56 5.07.97 1.83 3.24 2.52 5.07 1.56l8.49-4.44c1.29-.68 2.07-2.04 2-3.49-.07-1.46-.93-2.68-2.22-3.18zM10 15.5v-7l6 3.5-6 3.5z"/></svg>Shorts</div><hr class="sdiv"><div class="ssec">Subscriptions</div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50"></div>Aviooli<div class="sub-dot"></div></div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=50"></div>ItsFunneh<div class="sub-dot"></div></div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=50"></div>Mehalic POPs<div class="sub-dot"></div></div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50"></div>ISAB</div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50"></div>Laughability</div><div class="sub-item"><div class="avatar"><img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=50"></div>Flamingo</div></nav><main id="main"><div id="chips"><button class="chip active" data-q="">All</button><button class="chip" data-q="Gaming">Gaming</button><button class="chip" data-q="Bloons">Bloons</button><button class="chip" data-q="Life Simulation Games">Life Simulation Games</button><button class="chip" data-q="Smartphones">Smartphones</button><button class="chip" data-q="Role-Playing Games">Role-Playing Games</button><button class="chip" data-q="Recently uploaded">Recently uploaded</button><button class="chip" data-q="Watched">Watched</button><button class="chip" data-q="New to you">New to you</button></div><div id="videoGrid"></div><div class="sec-title"><svg width="24" height="24" viewBox="0 0 24 24" fill="#ff0000"><path d="M17.77 10.32l-1.2-.5L18 9.06c1.84-.96 2.53-3.23 1.56-5.06s-3.24-2.53-5.07-1.56L6 6.94c-1.29.68-2.07 2.04-2 3.49.07 1.46.93 2.68 2.22 3.18l1.25.5-1.43.76c-1.84.96-2.53 3.23-1.56 5.07.97 1.83 3.24 2.52 5.07 1.56l8.49-4.44c1.29-.68 2.07-2.04 2-3.49-.07-1.46-.93-2.68-2.22-3.18zM10 15.5v-7l6 3.5-6 3.5z"/></svg>Shorts</div><div id="shortsGrid"></div></main></div><script>"use strict";
 const API_KEY="__YOUTUBE_API_KEY__";
 const API_BASE="https://www.googleapis.com/youtube/v3";
 const $=id=>document.getElementById(id);
-let nextPageToken="",currentContext="home",channelIdCache={};
+let cache={};
+
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 function fmtViews(n){n=parseInt(n)||0;if(n>=1e9)return(n/1e9).toFixed(1)+'B views';if(n>=1e6)return(n/1e6).toFixed(1)+'M views';if(n>=1e3)return Math.round(n/1e3)+'K views';return n+' views';}
 function fmtAgo(iso){if(!iso)return'';const s=Math.floor((Date.now()-new Date(iso))/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+' min ago';if(s<86400)return Math.floor(s/3600)+' hours ago';if(s<2592000)return Math.floor(s/86400)+' days ago';return Math.floor(s/31536000)+' years ago';}
@@ -13,67 +14,74 @@ async function apiReq(endpoint,params={}){
   Object.entries({...params,key:API_KEY}).forEach(([k,v])=>v!=null&&url.searchParams.set(k,v));
   const res=await fetch(url);const data=await res.json();
   if(!res.ok||data.error)throw new Error(data?.error?.message||'HTTP '+res.status);
-  $('apiStatus').textContent="API live";$('apiStatus').className="ok";return data;
+  return data;
 }
 
-async function fetchChannelThumbs(channelIds){
-  const missing=channelIds.filter(id=>!channelIdCache[id]);
+async function loadChannelThumbs(ids){
+  const missing=ids.filter(id=>!cache[id]);
   if(missing.length===0)return;
   try{
-    const data=await apiReq('channels',{part:'snippet',id:missing.join(',')});
-    data.items.forEach(c=>{channelIdCache[c.id]=c.snippet.thumbnails?.default?.url;});
+    const d=await apiReq('channels',{part:'snippet',id:missing.join(',')});
+    d.items.forEach(c=>{cache[c.id]=c.snippet.thumbnails?.default?.url;});
   }catch(e){}
 }
 
-async function loadVideos(append=false){
-  if(!append)$('videoGrid').innerHTML='';
+async function loadContent(query=''){
+  const grid=$('videoGrid');
+  const sGrid=$('shortsGrid');
+  grid.innerHTML='<p style="color:#aaa">Loading...</p>';
+  sGrid.innerHTML='';
   try{
-    const data=await apiReq('videos',{part:'snippet,statistics',chart:'mostPopular',maxResults:20,regionCode:'US',pageToken:nextPageToken});
-    nextPageToken=data.nextPageToken||"";
-    const channelIds=[...new Set(data.items.map(v=>v.snippet.channelId))];
-    await fetchChannelThumbs(channelIds);
-    data.items.forEach(v=>{
-      const id=v.id, title=v.snippet.title, chan=v.snippet.channelTitle, cId=v.snippet.channelId;
+    const endpoint=query? 'search':'videos';
+    const params=query? {part:'snippet',q:query,maxResults:12,type:'video'} : {part:'snippet,statistics',chart:'mostPopular',maxResults:12,regionCode:'US'};
+    const data=await apiReq(endpoint,params);
+    const items=data.items||[];
+    const cIds=[...new Set(items.map(v=>v.snippet.channelId))];
+    await loadChannelThumbs(cIds);
+    grid.innerHTML='';
+    items.forEach(v=>{
+      const id=v.id.videoId||v.id;
+      const title=v.snippet.title;
+      const chan=v.snippet.channelTitle;
+      const cId=v.snippet.channelId;
       const thumb=v.snippet.thumbnails.high?.url||v.snippet.thumbnails.default?.url;
-      const views=v.statistics?.viewCount, date=v.snippet.publishedAt;
-      const thumbUrl=channelIdCache[cId];
-      const avHtml=thumbUrl?`<img src="${esc(thumbUrl)}">`:`<span>${esc(initials(chan))}</span>`;
+      const tUrl=cache[cId];
+      const avHtml=tUrl?`<img src="${esc(tUrl)}">`:`<span>${esc(initials(chan))}</span>`;
       const el=document.createElement('div');el.className='vc';
-      el.innerHTML=`<div class="vthumb"><img src="${esc(thumb)}" loading="lazy"></div><div class="vmeta"><div class="vavatar">${avHtml}</div><div style="min-width:0"><div class="vtitle">${esc(title)}</div><div class="vchan">${esc(chan)}</div><div class="vstats">${views?fmtViews(views)+' · ':''}${fmtAgo(date)}</div></div></div>`;
-      el.onclick=()=>location.href='https://www.youtube.com/watch?v='+id;
-      $('videoGrid').appendChild(el);
+      el.innerHTML=`<div class="vthumb"><img src="${esc(thumb)}" loading="lazy"></div><div class="vmeta"><div class="vavatar">${avHtml}</div><div style="min-width:0"><div class="vtitle">${esc(title)}</div><div class="vchan">${esc(chan)}</div><div class="vstats">${fmtAgo(v.snippet.publishedAt)}</div></div></div>`;
+      el.onclick=()=>window.open('https://www.youtube.com/watch?v='+id,'_blank');
+      grid.appendChild(el);
     });
-  }catch(e){$('videoGrid').innerHTML='<p style="color:#ff4444">Error loading videos</p>';}
-}
 
-// Shorts Tab implementation without YouTube API search restrictions
-async function loadShorts(){
-  currentContext="shorts";
-  const rands=["q8RbnLMAlAA","dQw4w9WgXcQ","jNQXAC9IVRw","9bZkp7q19f0","kJQP7kiw5Fk"];
-  const randomShortId=rands[Math.floor(Math.random()*rands.length)];
-  history.pushState({},'',`shorts/${randomShortId}`);
-  $('feedView').style.display='none';
-  const vc=$('viewContainer');
-  vc.style.display='flex';
-  vc.innerHTML=`<div class="shorts-player"><iframe src="https://www.youtube.com/embed/${randomShortId}?autoplay=1&loop=1&playlist=${randomShortId}" allow="autoplay"></iframe></div>`;
-}
-
-$('navHome').onclick=()=>{
-  currentContext="home";history.pushState({},'',document.location.pathname);
-  $('viewContainer').style.display='none';$('feedView').style.display='block';
-};
-$('navShorts').onclick=loadShorts;
-$('navChan').onclick=()=>{
-  currentContext="chan";history.pushState({},'','@debugy/videos');
-  $('viewContainer').style.display='none';$('feedView').style.display='block';
-  loadVideos(false);
-};
-
-window.onscroll=()=>{
-  if(currentContext==="home"&&window.innerHeight+window.scrollY>=document.body.offsetHeight-500){
-    loadVideos(true);
+    // Populate Shorts section with separate query
+    const sData=await apiReq('search',{part:'snippet',q:'shorts vertical',maxResults:5,type:'video'});
+    sData.items.forEach(s=>{
+      const sId=s.id.videoId;
+      const sTitle=s.snippet.title;
+      const sThumb=s.snippet.thumbnails.high?.url||s.snippet.thumbnails.default?.url;
+      const card=document.createElement('div');card.className='sh-card';
+      card.innerHTML=`<div class="sh-thumb"><img src="${esc(sThumb)}" loading="lazy"></div><div class="sh-title">${esc(sTitle)}</div>`;
+      card.onclick=()=>window.open('https://www.youtube.com/shorts/'+sId,'_blank');
+      sGrid.appendChild(card);
+    });
+  }catch(e){
+    grid.innerHTML=`<p style="color:#ff4444">Error loading content: ${esc(e.message)}</p>`;
   }
+}
+
+document.querySelectorAll('.chip').forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    btn.classList.add('active');
+    loadContent(btn.dataset.q);
+  };
+});
+
+$('searchForm').onsubmit=e=>{
+  e.preventDefault();
+  const q=$('searchInput').value.trim();
+  if(q)loadContent(q);
 };
 
-loadVideos(false);
+loadContent('');
 </script></body></html>
