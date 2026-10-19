@@ -5,20 +5,20 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NoveTube</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0} :root{--bg:#0f0f0f;--bg2:#212121;--bg3:#303030;--text:#f1f1f1;--muted:#aaa;--border:#383838;--red:#f00;--hh:56px;--sw:240px}
-html,body{min-height:100%;background:var(--bg);color:var(--text);font:14px Roboto,Arial,sans-serif}body{min-height:100vh}button,input{font:inherit}button{border:0;background:none;color:inherit;cursor:pointer}img{display:block;max-width:100%}a{color:inherit;text-decoration:none}#hdr{height:var(--hh);position:fixed;inset:0 0 auto;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 16px;border-bottom:1px solid #222}.hl,.hr,.hc{display:flex;align-items:center}.hl{gap:8px;flex-shrink:0}.ibtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}.ibtn:hover{background:var(--bg3)}.logo{display:flex;align-items:center;gap:6px;padding:4px;cursor:pointer;font-size:19px;font-weight:700;white-space:nowrap}.logo-mark{width:28px;height:20px;background:var(--red);border-radius:5px;display:grid;place-items:center}.hc{flex:1;max-width:640px;margin:auto}.search{height:40px;width:100%;display:flex}.search input{min-width:0;flex:1;background:var(--bg);color:white;border:1px solid var(--border);border-right:0;border-radius:40px 0 0 40px;padding:0 16px;outline:none;font-size:15px}.search input:focus{border-color:#246fc4}.search button{width:64px;background:var(--bg2);border:1px solid var(--border);border-radius:0 40px 40px 0;display:grid;place-items:center}.hr{gap:10px;flex-shrink:0}.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#444;flex-shrink:0}
+*{box-sizing:border-box;margin:0;padding:0}:root{--bg:#0f0f0f;--bg2:#212121;--bg3:#303030;--text:#f1f1f1;--muted:#aaa;--border:#383838;--red:#f00;--hh:56px;--sw:240px}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font:14px Roboto,Arial,sans-serif}body{min-height:100vh}button,input{font:inherit}button{border:0;background:none;color:inherit;cursor:pointer}img{display:block;max-width:100%}a{color:inherit;text-decoration:none}
+#hdr{height:var(--hh);position:fixed;inset:0 0 auto;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 16px;border-bottom:1px solid #222}.hl,.hr,.hc{display:flex;align-items:center}.hl{gap:8px;flex-shrink:0}.ibtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}.ibtn:hover{background:var(--bg3)}.logo{display:flex;align-items:center;gap:6px;padding:4px;cursor:pointer;font-size:19px;font-weight:700;white-space:nowrap}.logo-mark{width:28px;height:20px;background:var(--red);border-radius:5px;display:grid;place-items:center}.hc{flex:1;max-width:640px;margin:auto}.search{height:40px;width:100%;display:flex}.search input{min-width:0;flex:1;background:var(--bg);color:white;border:1px solid var(--border);border-right:0;border-radius:40px 0 0 40px;padding:0 16px;outline:none;font-size:15px}.search input:focus{border-color:#246fc4}.search button{width:64px;background:var(--bg2);border:1px solid var(--border);border-radius:0 40px 40px 0;display:grid;place-items:center}.hr{gap:10px;flex-shrink:0}.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover;background:#444;flex-shrink:0}
 #sidebar{position:fixed;top:var(--hh);bottom:0;left:0;width:var(--sw);overflow-y:auto;background:var(--bg);padding:12px;z-index:40;transition:transform .2s}.si{height:42px;padding:0 12px;display:flex;align-items:center;gap:22px;border-radius:10px;cursor:pointer;margin-bottom:3px;white-space:nowrap}.si:hover,.sub-item:hover{background:var(--bg2)}.si.active{background:var(--bg3);font-weight:500}.sdiv{border:0;border-top:1px solid var(--border);margin:12px 0}.ssec{padding:4px 12px 10px;font-weight:500}.sub-item{height:40px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:8px;cursor:pointer}.sub-item img{width:28px;height:28px;border-radius:50%;object-fit:cover}.sub-dot{width:6px;height:6px;background:#3ea6ff;border-radius:50%;margin-left:auto}
 #main{margin-left:var(--sw);padding:calc(var(--hh) + 18px) 24px 32px;min-height:100vh;transition:margin .2s}body.collapsed #sidebar{transform:translateX(-100%)}body.collapsed #main{margin-left:0}.view{display:none}.view.active{display:block}
 #categories{position:sticky;top:var(--hh);z-index:10;display:flex;gap:10px;overflow-x:auto;padding:0 0 20px;background:var(--bg);scrollbar-width:none}#categories::-webkit-scrollbar{display:none}.chip{white-space:nowrap;background:var(--bg3);padding:9px 13px;border-radius:8px;font-weight:500}.chip:hover{background:#454545}.chip.active{background:var(--text);color:#111}
-#videoGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:28px 16px}.vc{min-width:0;cursor:pointer}.vthumb{position:relative;aspect-ratio:16/9;background:#202020;border-radius:12px;overflow:hidden;margin-bottom:11px}.vthumb img{width:100%;height:100%;object-fit:cover;transition:transform .2s}.vc:hover .vthumb img{transform:scale(1.025)}.vmeta{display:flex;gap:12px}.vavatar{width:36px;height:36px;border-radius:50%;background:#333;object-fit:cover;flex-shrink:0;cursor:pointer}.vinfo{min-width:0;flex:1}.vtitle{font-size:15px;font-weight:500;line-height:1.4;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vchan,.vstats{font-size:13px;color:var(--muted);line-height:1.6}.vchan{cursor:pointer;width:fit-content}.vchan:hover{text-decoration:underline;color:var(--text)}.status{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 12px;line-height:2}.status button{background:var(--bg3);padding:10px 16px;border-radius:20px;margin-top:8px}
+#videoGrid,.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:28px 16px}.vc{min-width:0;cursor:pointer}.vthumb{position:relative;aspect-ratio:16/9;background:#202020;border-radius:12px;overflow:hidden;margin-bottom:11px}.vthumb img{width:100%;height:100%;object-fit:cover;transition:transform .2s}.vc:hover .vthumb img{transform:scale(1.025)}.vmeta{display:flex;gap:12px}.vavatar{width:36px;height:36px;border-radius:50%;background:#333;object-fit:cover;flex-shrink:0;cursor:pointer}.vinfo{min-width:0;flex:1}.vtitle{font-size:15px;font-weight:500;line-height:1.4;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vchan,.vstats{font-size:13px;color:var(--muted);line-height:1.6}.vchan{cursor:pointer;width:fit-content}.vchan:hover{text-decoration:underline;color:var(--text)}.status{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 12px;line-height:2;overflow-wrap:anywhere}.status button{background:var(--bg3);padding:10px 16px;border-radius:20px;margin-top:8px}
 .sec-title{font-size:19px;font-weight:700;margin:8px 0 20px}.watch-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;max-width:1500px;margin:auto}.player{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}.watch-title{font-size:21px;line-height:1.4;margin:14px 0}.watch-info{display:flex;align-items:center;gap:12px;margin:14px 0 20px}.watch-info .avatar{width:42px;height:42px;cursor:pointer}.watch-author{font-weight:500;cursor:pointer}.watch-author:hover{text-decoration:underline}.watch-stats{font-size:13px;color:var(--muted);margin-top:5px}.watch-related{display:grid;align-content:start;gap:16px}.related{display:flex;gap:10px;cursor:pointer;min-width:0}.related .vthumb{width:46%;flex-shrink:0;margin:0;border-radius:8px}.related .vtitle{font-size:14px}.related .vavatar{display:none}
 .channel-head{display:flex;align-items:center;gap:24px;margin:14px 0 28px;flex-wrap:wrap}.channel-avatar{width:120px;height:120px;border-radius:50%;object-fit:cover;background:#333}.channel-name{font-size:28px;font-weight:700;margin-bottom:8px;overflow-wrap:anywhere}.channel-detail{color:var(--muted);line-height:1.8}.channel-tabs{display:flex;gap:28px;border-bottom:1px solid var(--border);margin-bottom:22px;padding-bottom:12px}.channel-tabs button{font-weight:500;color:var(--muted)}.channel-tabs button.active{color:white}
-#shortsView{display:none;justify-content:center;align-items:center;gap:16px;min-height:calc(100vh - 90px)}.short-stage{height:min(78vh,760px);height:min(78dvh,760px);aspect-ratio:9/16;max-width:calc(100vw - 90px);position:relative;overflow:hidden;border-radius:14px;background:#000;touch-action:pan-y}.short-stage iframe{width:100%;height:100%;border:0}.short-controls{display:flex;flex-direction:column;gap:12px}.short-arrow{width:44px;height:44px;border-radius:50%;background:var(--bg3);font-size:24px;display:grid;place-items:center}.short-arrow:hover{background:#454545}.short-label{font-size:11px;color:var(--muted);text-align:center}
+#shortsView{display:none;justify-content:center;align-items:center;gap:16px;min-height:calc(100vh - 90px)}#shortsView.active{display:flex}.short-stage{height:min(78vh,760px);height:min(78dvh,760px);aspect-ratio:9/16;max-width:calc(100vw - 90px);position:relative;overflow:hidden;border-radius:14px;background:#000;touch-action:pan-y}.short-stage iframe{width:100%;height:100%;border:0}.short-controls{display:flex;flex-direction:column;gap:12px}.short-arrow{width:44px;height:44px;border-radius:50%;background:var(--bg3);font-size:24px;display:grid;place-items:center}.short-arrow:hover{background:#454545}.short-label{font-size:11px;color:var(--muted);text-align:center}
 @media(max-width:1050px){.watch-layout{grid-template-columns:1fr}.watch-related{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}}
-@media(max-width:650px){#hdr{padding:0 7px;gap:5px}.hl{gap:2px}.ibtn{width:34px}.logo{font-size:16px;gap:4px}.hc{min-width:0}.search{height:36px}.search input{width:40px;padding:0 9px;font-size:14px}.search button{width:40px}.hr{gap:2px}.hr .ibtn{display:none}#sidebar{width:240px;box-shadow:5px 0 20px #0006}#main{margin-left:0;padding:calc(var(--hh) + 12px) 12px 24px}#videoGrid{grid-template-columns:1fr;gap:24px}.vthumb{border-radius:9px}#categories{top:var(--hh)}.watch-title{font-size:18px}.player{border-radius:0}.channel-avatar{width:84px;height:84px}.channel-name{font-size:23px}#shortsView{min-height:calc(100dvh - 85px);gap:5px}.short-stage{height:76dvh;height:min(76dvh,720px);max-width:calc(100vw - 65px);border-radius:10px}.short-controls{gap:8px}.short-arrow{width:36px;height:36px}}
+@media(max-width:650px){#hdr{padding:0 7px;gap:5px}.hl{gap:2px}.ibtn{width:34px}.logo{font-size:16px;gap:4px}.hc{min-width:0}.search{height:36px}.search input{width:40px;padding:0 9px;font-size:14px}.search button{width:40px}.hr{gap:2px}.hr .ibtn{display:none}#sidebar{width:240px;box-shadow:5px 0 20px #0006}#main{margin-left:0;padding:calc(var(--hh) + 12px) 12px 24px}#videoGrid,.video-grid{grid-template-columns:1fr;gap:24px}.vthumb{border-radius:9px}#categories{top:var(--hh)}.watch-title{font-size:18px}.player{border-radius:0}.channel-avatar{width:84px;height:84px}.channel-name{font-size:23px}#shortsView{min-height:calc(100dvh - 85px);gap:5px}.short-stage{height:76dvh;height:min(76dvh,720px);max-width:calc(100vw - 65px);border-radius:10px}.short-controls{gap:8px}.short-arrow{width:36px;height:36px}}
 </style>
 </head>
 <body>
@@ -37,10 +37,7 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font:14px Robot
 <div class="sub-item" data-channel="UC-lHJZR3Gqxh24_OCtq2JxA"><img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50" alt="">Aviooli<div class="sub-dot"></div></div>
 <div class="sub-item" data-channel="UCYJPby9DRCteedh5tfxVbrw"><img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=50" alt="">ItsFunneh<div class="sub-dot"></div></div>
 <hr class="sdiv"><div class="ssec">Explore</div>
-<div class="si" data-cat="Gaming">🎮 Gaming</div>
-<div class="si" data-cat="Music">♫ Music</div>
-<div class="si" data-cat="News">▤ News</div>
-<div class="si" data-cat="Sports">⚽ Sports</div>
+<div class="si" data-cat="Gaming">🎮 Gaming</div><div class="si" data-cat="Music">♫ Music</div><div class="si" data-cat="News">▤ News</div><div class="si" data-cat="Sports">⚽ Sports</div>
 </nav>
 <main id="main">
 <section class="view active" id="homeView"><div id="categories"></div><div id="videoGrid"></div></section>
@@ -51,8 +48,14 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font:14px Robot
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-const INVIDIOUS_API="https://invidious.jing.rocks/api/v1";
-const CATEGORIES=["All","Gaming","Roblox","Minecraft","Music","Entertainment","Education","Technology","News","Science","Sports","Comedy"];
+const API_BASES=[
+"https://invidious.jing.rocks/api/v1",
+"https://inv.nadeko.net/api/v1",
+"https://invidious.nerdvpn.de/api/v1",
+"https://invidious.privacyredirect.com/api/v1",
+"https://inv.tux.pizza/api/v1"
+];
+let activeApi=localStorage.getItem("novetube_api")||API_BASES[0];
 let view="home",query="",category="All",videos=[],requestId=0,shorts=[],shortIndex=0,shortBusy=false;
 const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch{return d}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
@@ -60,28 +63,49 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const historyVideos=()=>read("novetube_history",[]);
 const fmtViews=n=>{n=Number(n)||0;return n>=1e9?(n/1e9).toFixed(1)+"B views":n>=1e6?(n/1e6).toFixed(1)+"M views":n>=1e3?Math.round(n/1e3)+"K views":n+" views"};
 const fmtAgo=n=>{n=Number(n)||0;if(!n)return"";if(n<3600)return Math.floor(n/60)+" min ago";if(n<86400)return Math.floor(n/3600)+" hours ago";if(n<2592000)return Math.floor(n/86400)+" days ago";if(n<31536000)return Math.floor(n/2592000)+" months ago";return Math.floor(n/31536000)+" years ago"};
-async function api(path){const r=await fetch(INVIDIOUS_API+path);if(!r.ok)throw Error("API HTTP "+r.status);return r.json()}
+async function api(path){
+const bases=[activeApi,...API_BASES.filter(x=>x!==activeApi)];
+let last;
+for(const base of bases){
+const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
+try{
+const r=await fetch(base+path,{signal:controller.signal});
+if(!r.ok)throw Error("HTTP "+r.status);
+const data=await r.json();
+activeApi=base;
+try{localStorage.setItem("novetube_api",base)}catch{}
+clearTimeout(timer);
+return data;
+}catch(e){last=e;clearTimeout(timer)}
+}
+throw Error("All video API servers failed. Last error: "+(last?.message||"network error"));
+}
 function catOf(v){const s=(v.title+" "+v.author+" "+(v.description||"")).toLowerCase();if(/roblox/.test(s))return"Roblox";if(/minecraft/.test(s))return"Minecraft";if(/gaming|gameplay|fortnite|valorant|gta|speedrun/.test(s))return"Gaming";if(/music|song|lyrics|phonk|remix/.test(s))return"Music";if(/science|space|physics|chemistry|biology/.test(s))return"Science";if(/tutorial|learn|lesson|education|how to|explained/.test(s))return"Education";if(/technology|iphone|android|computer|programming|tech review/.test(s))return"Technology";if(/football|basketball|sports|match highlights/.test(s))return"Sports";if(/news|politics|breaking/.test(s))return"News";if(/comedy|funny|memes|prank/.test(s))return"Comedy";return"Entertainment"}
+const CATEGORIES=["All","Gaming","Roblox","Minecraft","Music","Entertainment","Education","Technology","News","Science","Sports","Comedy"];
 function renderCategories(){$("categories").innerHTML=CATEGORIES.map(c=>`<button class="chip${c===category?" active":""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");$("categories").querySelectorAll("button").forEach(b=>b.onclick=()=>selectCategory(b.dataset.cat))}
 function status(el,msg,retry){el.innerHTML=`<div class="status">${esc(msg)}${retry?'<br><button id="retryBtn">Try again</button>':""}</div>`;if(retry)$("retryBtn").onclick=()=>loadVideos(query,category)}
 function thumb(v){return v.videoThumbnails?.find(t=>t.quality==="medium")?.url||v.videoThumbnails?.[0]?.url||`https://i.ytimg.com/vi/${encodeURIComponent(v.videoId)}/hqdefault.jpg`}
 function avatar(v){return v.authorThumbnails?.[0]?.url||v.authorThumb||"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50"}
-function remember(v){let h=historyVideos().filter(x=>x.id!==v.videoId);h.unshift({id:v.videoId,title:v.title,author:v.author,authorId:v.authorId,category:catOf(v),time:Date.now()});save("novetube_history",h.slice(0,100))}
+function remember(v){if(!v?.videoId)return;let h=historyVideos().filter(x=>x.id!==v.videoId);h.unshift({id:v.videoId,title:v.title,author:v.author,authorId:v.authorId,category:catOf(v),time:Date.now()});save("novetube_history",h.slice(0,100))}
 function recommendedCat(){const counts={};historyVideos().slice(0,25).forEach(v=>counts[v.category]=(counts[v.category]||0)+1);return Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0]||""}
-function setView(v){view=v;document.querySelectorAll(".view").forEach(el=>el.classList.toggle("active",el.id===({home:"homeView",watch:"watchView",channel:"channelView",shorts:"shortsView"}[v])));$("navHome").classList.toggle("active",v==="home");$("navShorts").classList.toggle("active",v==="shorts");}
+function setView(v){view=v;document.querySelectorAll(".view").forEach(el=>el.classList.toggle("active",el.id===({home:"homeView",watch:"watchView",channel:"channelView",shorts:"shortsView"}[v])));$("navHome").classList.toggle("active",v==="home");$("navShorts").classList.toggle("active",v==="shorts")}
 async function loadVideos(q="",cat="All"){
 query=q;category=cat;renderCategories();const token=++requestId;status($("videoGrid"),q?"Searching...":"Loading recommendations...");
 try{
 let data=[];
 if(q)data=await api("/search?q="+encodeURIComponent(q)+"&type=video");
 else if(cat!=="All")data=await api("/search?q="+encodeURIComponent(cat)+"&type=video");
-else{const rc=recommendedCat();const res=await Promise.all([api("/trending?region=US"),rc?api("/search?q="+encodeURIComponent(rc)+"&type=video").catch(()=>[]):Promise.resolve([])]);data=[...res[1],...res[0]]}
+else{
+const rc=recommendedCat();
+const res=await Promise.all([api("/trending?region=US"),rc?api("/search?q="+encodeURIComponent(rc)+"&type=video").catch(()=>[]):Promise.resolve([])]);
+data=[...res[1],...res[0]];
+}
 if(token!==requestId)return;
 const seen=new Set();videos=data.filter(v=>v?.videoId&&!seen.has(v.videoId)&&seen.add(v.videoId));
 if(cat!=="All"&&!q)videos=videos.filter(v=>catOf(v)===cat);
-if(!videos.length){status($("videoGrid"),"No videos found. Try another search or category.");return}
+if(!videos.length){status($("videoGrid"),"No videos found. Try another search or category.",true);return}
 renderVideos(videos,$("videoGrid"));
-}catch(e){if(token===requestId)status($("videoGrid"),"Could not load videos. "+e.message,true)}
+}catch(e){if(token===requestId)status($("videoGrid"),e.message,true)}
 }
 function makeCard(v,small=false){
 const el=document.createElement("article");el.className=small?"related":"vc";el.tabIndex=0;
@@ -92,13 +116,15 @@ el.onclick=()=>openWatch(v);el.onkeydown=e=>{if(e.key==="Enter")openWatch(v)};
 return el;
 }
 function renderVideos(list,target){target.replaceChildren();list.forEach(v=>target.appendChild(makeCard(v,target===$("watchRelated"))))}
+function appPath(path){return new URL(path,location.origin).pathname+new URL(path,location.origin).search}
 function openWatch(v){
+if(!v?.videoId)return;
 remember(v);
-const url="/watch?v="+encodeURIComponent(v.videoId);
-window.open(url,"_blank","noopener");
+window.open(appPath("/watch?v="+encodeURIComponent(v.videoId)),"_blank","noopener");
 }
 async function loadWatch(id){
-setView("watch");if(!id){$("watchTitle").textContent="Video not found";return}
+setView("watch");
+if(!id){$("watchTitle").textContent="Video not found";$("watchPlayer").removeAttribute("src");return}
 $("watchPlayer").src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&rel=0";
 $("watchTitle").textContent="Loading video...";$("watchAuthor").textContent="";$("watchStats").textContent="";$("watchRelated").replaceChildren();
 try{
@@ -107,57 +133,60 @@ $("watchTitle").textContent=v.title||"Video";$("watchAuthor").textContent=v.auth
 $("watchAvatar").src=v.authorThumbnails?.[0]?.url||"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=50";
 $("watchAvatar").onclick=$("watchAuthor").onclick=()=>openChannel(v.authorId,v.author,v.authorThumbnails?.[0]?.url);
 remember({...v,videoId:id});
-}catch{$("watchTitle").textContent="Video";$("watchAuthor").textContent="Video details unavailable";$("watchAvatar").src=avatar({})}
+}catch{$("watchTitle").textContent="Video player";$("watchAuthor").textContent="Video details unavailable. The embedded player may still work.";$("watchAvatar").src=avatar({})}
 try{const related=await api("/related_streams/"+encodeURIComponent(id));renderVideos(related.slice(0,15),$("watchRelated"))}catch{}
 }
 async function openChannel(id,name,image){
-if(!id){$("channelName").textContent=name||"Channel";$("channelDetail").textContent="Channel ID unavailable";$("channelAvatar").src=image||avatar({});$("channelGrid").replaceChildren();setView("channel");history.pushState({view:"channel"},"","/channel");return}
-history.pushState({view:"channel",id},"","/channel/"+encodeURIComponent(id));await loadChannel(id,name,image)
+if(!id){$("channelName").textContent=name||"Channel";$("channelDetail").textContent="Channel ID unavailable";$("channelAvatar").src=image||avatar({});$("channelGrid").replaceChildren();setView("channel");history.pushState({view:"channel"},"",appPath("/channel"));return}
+history.pushState({view:"channel",id},"",appPath("/channel/"+encodeURIComponent(id)));await loadChannel(id,name,image);
 }
 async function loadChannel(id,name="",image=""){
 setView("channel");$("channelName").textContent=name||"Channel";$("channelDetail").textContent="Loading channel...";$("channelAvatar").src=image||avatar({});status($("channelGrid"),"Loading channel videos...");
+if(!id){status($("channelGrid"),"This channel has no available channel ID.");return}
 try{
 const c=await api("/channels/"+encodeURIComponent(id));$("channelName").textContent=c.author||name||"Channel";$("channelDetail").textContent=[c.subCount?Number(c.subCount).toLocaleString()+" subscribers":"",c.description||""].filter(Boolean).join(" · ");$("channelAvatar").src=c.authorThumbnails?.[0]?.url||image||avatar({});
 let list=c.latestVideos||c.relatedStreams||[];
 if(!list.length){try{list=await api("/channels/"+encodeURIComponent(id)+"/videos")}catch{}}
-if(!list.length){status($("channelGrid"),"No channel videos were returned.");return}
+if(!list.length){status($("channelGrid"),"No channel videos were returned.",true);return}
 renderVideos(list,$("channelGrid"));
-}catch(e){status($("channelGrid"),"Could not load this channel. "+e.message)}
+}catch(e){status($("channelGrid"),"Could not load this channel. "+e.message,true)}
 }
 async function loadShorts(){
 setView("shorts");
 if(!shorts.length){
 $("shortStage").innerHTML='<div style="padding:24px;color:#aaa">Loading Shorts...</div>';
 try{const d=await api("/trending?region=US");shorts=d.filter(v=>v.videoId&&Number(v.lengthSeconds)>0&&Number(v.lengthSeconds)<=180).map(v=>v.videoId)}catch{}
-if(!shorts.length){$("shortStage").innerHTML='<div style="padding:24px;color:#aaa">Shorts are unavailable right now.</div>';return}
+if(!shorts.length){$("shortStage").innerHTML='<div style="padding:24px;color:#aaa">Shorts unavailable. Try again later.</div>';return}
 $("shortStage").innerHTML='<iframe id="shortPlayer" title="Shorts player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
 shortIndex=0;
 }
-playShort(shortIndex,false)
+playShort(shortIndex,false);
 }
 function playShort(i,push=true){
-if(!shorts.length)return;shortIndex=(i+shorts.length)%shorts.length;const id=shorts[shortIndex];
-$("shortPlayer").src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(id)+"?autoplay=1&rel=0";
-if(push)history.pushState({view:"shorts",index:shortIndex},"","/shorts");
+if(!shorts.length||!$("shortPlayer"))return;
+shortIndex=(i+shorts.length)%shorts.length;
+$("shortPlayer").src="https://www.youtube-nocookie.com/embed/"+encodeURIComponent(shorts[shortIndex])+"?autoplay=1&rel=0";
+if(push)history.pushState({view:"shorts",index:shortIndex},"",appPath("/shorts"));
 }
 function nextShort(n){playShort(shortIndex+n)}
-function selectCategory(c){history.pushState({view:"home",category:c},"","/");loadVideos("",c)}
-$("searchForm").onsubmit=e=>{e.preventDefault();const q=$("searchInput").value.trim();if(!q)return;history.pushState({view:"home",query:q},"","/?q="+encodeURIComponent(q));loadVideos(q,"All")};
-$("navHome").onclick=()=>{history.pushState({view:"home"},"","/");$("searchInput").value="";loadVideos()};
+function selectCategory(c){history.pushState({view:"home",category:c},"",appPath("/"));loadVideos("",c)}
+$("searchForm").onsubmit=e=>{e.preventDefault();const q=$("searchInput").value.trim();if(!q)return;history.pushState({view:"home",query:q},"",appPath("/?q="+encodeURIComponent(q)));loadVideos(q,"All")};
+$("navHome").onclick=()=>{history.pushState({view:"home"},"",appPath("/"));$("searchInput").value="";loadVideos()};
 $("homeLogo").onclick=$("navHome").onclick;
-$("navShorts").onclick=()=>{history.pushState({view:"shorts"},"","/shorts");shorts=[];loadShorts()};
+$("navShorts").onclick=()=>{history.pushState({view:"shorts"},"",appPath("/shorts"));shorts=[];loadShorts()};
 $("menuBtn").onclick=()=>document.body.classList.toggle("collapsed");
 document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>selectCategory(b.dataset.cat));
-document.querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>openChannel(b.dataset.channel,b.textContent.trim(),b.querySelector("img")?.src));
+document.querySelectorAll("[data-channel]").forEach(b=>b.onclick=()=>openChannel(b.dataset.channel,b.childNodes[1]?.textContent?.trim()||b.textContent.trim(),b.querySelector("img")?.src));
 $("shortUp").onclick=()=>nextShort(-1);$("shortDown").onclick=()=>nextShort(1);
 $("shortStage").addEventListener("wheel",e=>{if(Math.abs(e.deltaY)>25&&!shortBusy){e.preventDefault();shortBusy=true;nextShort(e.deltaY>0?1:-1);setTimeout(()=>shortBusy=false,500)}},{passive:false});
-let touchY=0;$("shortStage").addEventListener("touchstart",e=>touchY=e.touches[0].clientY,{passive:true});$("shortStage").addEventListener("touchend",e=>{const d=touchY-e.changedTouches[0].clientY;if(Math.abs(d)>50)nextShort(d>0?1:-1)},{passive:true});
+let touchY=0;$("shortStage").addEventListener("touchstart",e=>touchY=e.touches[0].clientY,{passive:true});
+$("shortStage").addEventListener("touchend",e=>{const d=touchY-e.changedTouches[0].clientY;if(Math.abs(d)>50)nextShort(d>0?1:-1)},{passive:true});
 document.addEventListener("keydown",e=>{if(view==="shorts"&&["ArrowUp","ArrowDown"].includes(e.key)){e.preventDefault();nextShort(e.key==="ArrowDown"?1:-1)}});
 function route(){
 const p=location.pathname,q=new URLSearchParams(location.search);
-if(p==="/watch"||p.endsWith("/watch"))loadWatch(q.get("v"));
+if(p.endsWith("/watch")||p==="/watch")loadWatch(q.get("v"));
 else if(p==="/channel"||p.startsWith("/channel/"))loadChannel(decodeURIComponent(p.split("/")[2]||""),q.get("name")||"");
-else if(p.includes("/shorts"))loadShorts();
+else if(p.endsWith("/shorts"))loadShorts();
 else{$("searchInput").value=q.get("q")||"";loadVideos(q.get("q")||"",history.state?.category||"All")}
 }
 window.addEventListener("popstate",route);
