@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NoveTube</title>
+<link rel="icon" href="data:,">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -21,7 +22,7 @@
 .thumb{position:relative;aspect-ratio:16/9;background:#242424;border-radius:12px;overflow:hidden}.thumb img{width:100%;height:100%;object-fit:cover;display:block}.duration{position:absolute;right:7px;bottom:7px;background:#000c;border-radius:4px;padding:3px 5px;font-size:12px}
 .videoInfo{display:flex;gap:12px;padding-top:12px}.channelIcon{width:36px;height:36px;border-radius:50%;background:#383838;flex-shrink:0;display:grid;place-items:center;font-weight:bold;overflow:hidden}.channelIcon img{width:100%;height:100%;object-fit:cover}
 .videoTitle{font-size:15px;font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{color:#aaa;font-size:13px;line-height:1.6;margin-top:5px}.video:hover .thumb{border-radius:3px}
-#message{color:#aaa;padding:35px 0;text-align:center;white-space:pre-wrap}#watchLayout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px}
+#message{color:#aaa;padding:35px 0;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere}#watchLayout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px}
 #player{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#000}#watchTitle{font-size:20px;line-height:1.4;margin:15px 0}#watchMeta{display:flex;align-items:center;gap:12px;flex-wrap:wrap}#watchChannel{font-weight:700;cursor:pointer}#description{background:#252525;padding:14px;border-radius:12px;margin-top:16px;white-space:pre-wrap;line-height:1.5;overflow-wrap:anywhere}
 .action{border:0;border-radius:20px;padding:10px 15px;background:#272727}.action:hover{background:#393939}#related{display:flex;flex-direction:column;gap:12px}.relatedItem{display:flex;gap:10px;cursor:pointer}.relatedItem img{width:155px;aspect-ratio:16/9;object-fit:cover;border-radius:8px}.relatedItem .videoTitle{font-size:13px}
 #shortsStage{height:calc(100vh - 110px);min-height:430px;display:flex;align-items:center;justify-content:center;gap:14px}#shortFrame{height:100%;max-height:780px;aspect-ratio:9/16;border:0;border-radius:14px;background:#181818}.shortControls{display:flex;flex-direction:column;gap:12px}.shortControls button{width:44px;height:44px;border:0;border-radius:50%;background:#272727;font-size:19px}
@@ -61,45 +62,48 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const fmt=n=>{n=Number(n)||0;return n>=1e9?(n/1e9).toFixed(1)+"B":n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"K":String(n)};
 function dur(s){let n=Number(s)||0;return Math.floor(n/3600)?Math.floor(n/3600)+":"+String(Math.floor(n%3600/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0"):Math.floor(n/60)+":"+String(n%60).padStart(2,"0")}
 function isoSeconds(s){let m=String(s||"").match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);return m?(+m[1]||0)*3600+(+m[2]||0)*60+(+m[3]||0):0}
-function thumb(v){return v.snippet?.thumbnails?.maxres?.url||v.snippet?.thumbnails?.high?.url||v.snippet?.thumbnails?.medium?.url||""}
+function thumb(v){return v.snippet?.thumbnails?.maxres?.url||v.snippet?.thumbnails?.high?.url||v.snippet?.thumbnails?.medium?.url||v.snippet?.thumbnails?.default?.url||""}
 function norm(v){return {id:v.id?.videoId||v.id, title:v.snippet?.title||"",channel:v.snippet?.channelTitle||"",channelId:v.snippet?.channelId||"",published:v.snippet?.publishedAt||"",description:v.snippet?.description||"",thumb:thumb(v),views:v.statistics?.viewCount||0,duration:isoSeconds(v.contentDetails?.duration),raw:v}}
-function notify(s){$("toast").textContent=s;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2800)}
+function notify(s){$("toast").textContent=s;$("toast").style.display="block";clearTimeout(notify.timer);notify.timer=setTimeout(()=>$("toast").style.display="none",2800)}
 async function yt(path,params={}){
-if(!KEY||KEY==="__YOUTUBE_API_KEY__")throw Error("YouTube API key wasn't injected. Check your GitHub Actions secret and deployment logs.");
+if(!KEY||KEY==="__YOUTUBE_API_KEY__")throw Error("The YouTube API key placeholder was not replaced during deployment. Check the YOUTUBE_API GitHub Actions secret and deployment logs.");
 const u=new URL(API+path);u.searchParams.set("key",KEY);for(const [k,v] of Object.entries(params))if(v!==undefined&&v!==null&&v!=="")u.searchParams.set(k,v);
-const r=await fetch(u);const d=await r.json();if(!r.ok)throw Error(d.error?.message||"YouTube API error "+r.status);return d
+let r,d;
+try{r=await fetch(u);d=await r.json()}catch(e){throw Error("Network request failed: "+(e.message||String(e)))}
+if(!r.ok){const er=d.error||{},reason=er.errors?.[0]?.reason;throw Error((reason?reason+": ":"")+(er.message||"YouTube API request failed with HTTP "+r.status))}
+return d
 }
-function showError(e){$("message").hidden=false;$("message").textContent=(e.message||String(e))+"\n\nIf this is an API error, check your Google Cloud API key, YouTube Data API v3 activation, restrictions and quota."}
+function showError(e){const m=$("message");if(!m)return;m.hidden=false;const s=e?.message||String(e);m.textContent=s+(/\bquota\b|keyInvalid|accessNotConfigured|refererNotAllowed|API key/i.test(s)?"\n\nCheck your Google Cloud API key, YouTube Data API v3 activation, key restrictions and quota.":"\n\nThis error may come from the specific YouTube API request, rather than the API key itself.")}
 function setTitle(s){$("pageTitle").textContent=s;$("pageTitle").hidden=!s}
 function buildChips(sel="All"){$("chips").innerHTML=CATEGORIES.map(c=>`<button class="${c===sel?"active":""}" onclick="chooseCategory('${c}')">${c}</button>`).join("")}
 function card(v){return `<article class="video" onclick="openWatch('${esc(v.id)}')"><div class="thumb"><img loading="lazy" src="${esc(v.thumb)}" alt=""><span class="duration">${dur(v.duration)}</span></div><div class="videoInfo"><div class="channelIcon">${esc((v.channel||"N").slice(0,1).toUpperCase())}</div><div><div class="videoTitle">${esc(v.title)}</div><div class="meta" onclick="event.stopPropagation();openChannel('${esc(v.channelId)}')">${esc(v.channel)}<br>${fmt(v.views)} views · ${v.published?new Date(v.published).toLocaleDateString():""}</div></div></div></article>`}
 function render(v){$("videoGrid").innerHTML=v.map(card).join("");$("message").hidden=!!v.length;if(!v.length)$("message").textContent="No videos found."}
-function resetMain(){ $("chips").style.display="flex";$("main").innerHTML='<h2 id="pageTitle"></h2><div id="videoGrid"></div><div id="message" hidden></div>'}
-async function enrich(items){let ids=items.map(v=>v.id?.videoId||v.id).filter(Boolean);if(!ids.length)return [];let d=await yt("/videos",{part:"snippet,contentDetails,statistics",id:ids.slice(0,50).join(","),maxResults:50});return d.items.map(norm)}
+function resetMain(){$("chips").style.display="flex";$("main").innerHTML='<h2 id="pageTitle"></h2><div id="videoGrid"></div><div id="message" hidden></div>'}
+async function enrich(items){const ids=items.map(v=>v.id?.videoId||v.id||v.contentDetails?.videoId).filter(Boolean);if(!ids.length)return [];const d=await yt("/videos",{part:"snippet,contentDetails,statistics",id:[...new Set(ids)].slice(0,50).join(","),maxResults:50});return d.items.map(norm)}
 async function loadVideos(q="",cat="All"){
 resetMain();buildChips(cat);setTitle(q?q+" videos":cat==="All"?"Recommended":cat);$("message").hidden=false;$("message").textContent="Loading videos…";
 try{
 let items;
-if(q){
-const p={part:"snippet",type:"video",q,maxResults:24,regionCode:"US",safeSearch:"moderate"};
+if(q||cat==="Recently uploaded"||cat==="Live"){
+const p={part:"snippet",type:"video",q:q||undefined,maxResults:24,regionCode:"US",safeSearch:"moderate"};
 if(CATEGORY_IDS[cat])p.videoCategoryId=CATEGORY_IDS[cat];
 if(cat==="Recently uploaded")p.order="date";
-if(cat==="Live")p.eventType="live",p.type="video";
-const d=await yt("/search",p);items=await enrich(d.items);
+if(cat==="Live"){p.eventType="live";p.order="date"}
+items=await enrich((await yt("/search",p)).items)
 }else{
 const p={part:"snippet,contentDetails,statistics",chart:"mostPopular",regionCode:"US",maxResults:24};
 if(CATEGORY_IDS[cat])p.videoCategoryId=CATEGORY_IDS[cat];
-const d=await yt("/videos",p);items=d.items.map(norm);
+items=(await yt("/videos",p)).items.map(norm)
 }
 render(items)
 }catch(e){showError(e)}
 }
-function chooseCategory(c){loadVideos(c==="All"?"":c,c)}
-function goHome(){history.pushState({},"","/");buildChips();loadVideos();setActive("home")}
+function chooseCategory(c){loadVideos("",c)}
+function goHome(){history.pushState({},"","/");loadVideos();setActive("home")}
 function setActive(p){document.querySelectorAll("#sidebar .nav").forEach((n,i)=>n.classList.toggle("active",p==="home"?i===0:p==="shorts"?i===1:p==="history"?i===2:false))}
 function openWatch(id){if(!id)return;history.pushState({},"","/?watch="+encodeURIComponent(id));loadWatch(id)}
 function saveHistory(v){try{let h=JSON.parse(localStorage.getItem("novetube_history")||"[]");h=[v,...h.filter(x=>x.id!==v.id)].slice(0,100);localStorage.setItem("novetube_history",JSON.stringify(h))}catch{}}
-function shareVideo(){navigator.clipboard?.writeText(location.href).then(()=>notify("Link copied")).catch(()=>notify(location.href))}
+function shareVideo(){if(!navigator.clipboard)return notify(location.href);navigator.clipboard.writeText(location.href).then(()=>notify("Link copied")).catch(()=>notify(location.href))}
 async function loadWatch(id){
 $("chips").style.display="none";$("main").innerHTML='<div id="watchLayout"><section><div id="message">Loading video…</div><div id="watchContent"></div></section><aside id="related"></aside></div>';
 try{
@@ -107,8 +111,12 @@ const d=await yt("/videos",{part:"snippet,contentDetails,statistics",id});if(!d.
 const v=norm(d.items[0]);saveHistory(v);
 $("watchContent").innerHTML=`<iframe id="player" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe><h2 id="watchTitle">${esc(v.title)}</h2><div id="watchMeta"><div class="channelIcon">${esc((v.channel||"N")[0])}</div><div><div id="watchChannel" onclick="openChannel('${esc(v.channelId)}')">${esc(v.channel)}</div><div class="meta">${fmt(v.views)} views · ${new Date(v.published).toLocaleDateString()}</div></div><button class="action" onclick="shareVideo()">Share</button></div><div id="description">${esc(v.description||"No description available.")}</div>`;
 $("message").remove();
-const related=await yt("/search",{part:"snippet",type:"video",relatedToVideoId:id,maxResults:12});
-const rel=await enrich(related.items);$("related").innerHTML=rel.map(v=>`<div class="relatedItem" onclick="openWatch('${esc(v.id)}')"><img loading="lazy" src="${esc(v.thumb)}"><div><div class="videoTitle">${esc(v.title)}</div><div class="meta">${esc(v.channel)}<br>${fmt(v.views)} views</div></div></div>`).join("");
+const relatedBox=$("related");
+try{
+const related=await yt("/search",{part:"snippet",type:"video",q:v.title,maxResults:12,safeSearch:"moderate"});
+const rel=(await enrich(related.items)).filter(x=>x.id!==id);
+relatedBox.innerHTML=rel.length?rel.map(x=>`<div class="relatedItem" onclick="openWatch('${esc(x.id)}')"><img loading="lazy" src="${esc(x.thumb)}" alt=""><div><div class="videoTitle">${esc(x.title)}</div><div class="meta">${esc(x.channel)}<br>${fmt(x.views)} views</div></div></div>`).join(""):"<div id=\"message\">No related videos found.</div>"
+}catch(e){relatedBox.innerHTML=`<div id="message">${esc(e.message)}</div>`}
 }catch(e){const m=$("message");if(m)showError(e);else $("main").innerHTML=`<div id="message">${esc(e.message)}</div>`}
 }
 async function openChannel(id){
@@ -125,15 +133,15 @@ async function showShorts(){
 history.pushState({},"","/?shorts=1");$("chips").style.display="none";$("main").innerHTML='<h2 id="pageTitle">Shorts</h2><div id="shortsStage"><div id="message">Loading Shorts…</div></div>';setActive("shorts");
 try{
 const d=await yt("/search",{part:"snippet",type:"video",q:"shorts",videoDuration:"short",order:"viewCount",maxResults:50});
-shorts=(await enrich(d.items)).filter(v=>v.duration>0&&v.duration<=180);shortIndex=0;renderShort();
+shorts=(await enrich(d.items)).filter(v=>v.duration>0&&v.duration<=180);shortIndex=0;renderShort()
 }catch(e){$("shortsStage").innerHTML=`<div id="message">${esc(e.message)}</div>`}
 }
 let shorts=[],shortIndex=0;
-function renderShort(){if(!shorts.length){$("shortsStage").innerHTML='<div id="message">No Shorts found.</div>';return}const v=shorts[shortIndex];$("shortsStage").innerHTML=`<iframe id="shortFrame" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe><div class="shortControls"><button onclick="moveShort(-1)">↑</button><button onclick="moveShort(1)">↓</button><button onclick="openWatch('${esc(v.id)}')">↗</button></div>`}
-function moveShort(n){shortIndex=(shortIndex+n+shorts.length)%shorts.length;renderShort()}
-function showHistory(){history.pushState({},"","/?history=1");$("chips").style.display="none";$("main").innerHTML='<h2 id="pageTitle">History</h2><div id="videoGrid"></div><div id="message" hidden></div>';try{const h=JSON.parse(localStorage.getItem("novetube_history")||"[]");render(h)}catch{render([])}setActive("history")}
-function route(){const p=new URLSearchParams(location.search);if(p.has("watch"))return loadWatch(p.get("watch"));if(p.has("channel"))return openChannel(p.get("channel"));if(p.has("shorts"))return showShorts();if(p.has("history"))return showHistory();if(p.has("q")){$("searchInput").value=p.get("q");return loadVideos(p.get("q"))}buildChips();loadVideos()}
-$("searchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("searchInput").value.trim();if(q){history.pushState({},"","/?q="+encodeURIComponent(q));loadVideos(q)}});
+function renderShort(){if(!shorts.length){$("shortsStage").innerHTML='<div id="message">No Shorts found.</div>';return}const v=shorts[shortIndex];$("shortsStage").innerHTML=`<iframe id="shortFrame" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(v.id)}?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe><div class="shortControls"><button onclick="moveShort(-1)" aria-label="Previous Short">↑</button><button onclick="moveShort(1)" aria-label="Next Short">↓</button><button onclick="openWatch('${esc(v.id)}')" aria-label="Open video">↗</button></div>`}
+function moveShort(n){if(!shorts.length)return;shortIndex=(shortIndex+n+shorts.length)%shorts.length;renderShort()}
+function showHistory(){history.pushState({},"","/?history=1");$("chips").style.display="none";$("main").innerHTML='<h2 id="pageTitle">History</h2><div id="videoGrid"></div><div id="message" hidden></div>';try{const h=JSON.parse(localStorage.getItem("novetube_history")||"[]");render(h);if(!h.length)$("message").textContent="Your watch history is empty."}catch{render([])}setActive("history")}
+function route(){const p=new URLSearchParams(location.search);if(p.has("watch"))return loadWatch(p.get("watch"));if(p.has("channel"))return openChannel(p.get("channel"));if(p.has("shorts"))return showShorts();if(p.has("history"))return showHistory();if(p.has("q")){$("searchInput").value=p.get("q");return loadVideos(p.get("q"))}setActive("home");buildChips();loadVideos()}
+$("searchForm").addEventListener("submit",e=>{e.preventDefault();const q=$("searchInput").value.trim();if(q){history.pushState({},"","/?q="+encodeURIComponent(q));loadVideos(q);setActive("")}});
 $("menu").addEventListener("click",()=>{const s=$("sidebar");s.style.display=s.style.display==="none"?"block":""});
 window.addEventListener("popstate",route);
 window.addEventListener("keydown",e=>{if(e.key==="Escape")goHome();if(location.search.includes("shorts")){if(e.key==="ArrowDown")moveShort(1);if(e.key==="ArrowUp")moveShort(-1)}});
