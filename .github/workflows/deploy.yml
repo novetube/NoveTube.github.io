@@ -1,38 +1,57 @@
 
 name: Deploy NoveTube
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inject API Key
+
+      - name: Inject and verify YouTube API key
         env:
           YT_KEY: ${{ secrets.YOUTUBE_API }}
         run: |
           python3 - <<'PY'
           import os
           from pathlib import Path
+
           p = Path("index.html")
-          c = p.read_text()
-          k = os.environ.get("YT_KEY", "")
-          if "__YOUTUBE_API_KEY__" in c:
-              if not k:
-                  raise Exception("YOUTUBE_API secret is empty or missing")
-              p.write_text(c.replace("__YOUTUBE_API_KEY__", k))
-              print("API key injected.")
-          else:
-              print("No API-key placeholder found; leaving HTML unchanged.")
+          html = p.read_text()
+          key = os.environ.get("YT_KEY", "").strip()
+
+          if not key:
+              raise SystemExit("ERROR: YOUTUBE_API secret is missing or empty.")
+
+          if "__YOUTUBE_API_KEY__" not in html:
+              raise SystemExit("ERROR: API-key placeholder not found in index.html.")
+
+          html = html.replace("__YOUTUBE_API_KEY__", key)
+
+          if "__YOUTUBE_API_KEY__" in html:
+              raise SystemExit("ERROR: API-key injection failed.")
+
+          p.write_text(html)
+          print("API key injected and verified. Key value hidden.")
           PY
+
       - uses: actions/configure-pages@v4
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+
       - uses: actions/deploy-pages@v4
