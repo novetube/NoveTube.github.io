@@ -20,9 +20,6 @@ header{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg);disp
 .vtitle{font-weight:500;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .vchan{font-size:12px;color:var(--text2)}
 #debugBox{background:#1a1a1a;border:1px solid var(--border);padding:12px;margin-bottom:16px;border-radius:8px;font-family:monospace;font-size:12px;color:#ff4444;word-break:break-all}
-#keyBar{background:var(--bg2);padding:16px;border-radius:8px;margin-bottom:16px;display:flex;gap:8px;align-items:center;border:1px solid var(--border)}
-#keyBar input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:4px;font-size:14px}
-#keyBar button{background:var(--red);color:#fff;border:none;padding:10px 20px;border-radius:4px;cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
@@ -30,30 +27,11 @@ header{position:fixed;top:0;left:0;right:0;height:56px;background:var(--bg);disp
   <div class="logo"><div class="logo-mark">▶</div>NoveTube</div>
 </header>
 <main id="main">
-  <div id="keyBar">
-    <input type="password" id="apiKeyInput" placeholder="Enter your YouTube API Key here...">
-    <button onclick="submitKey()">Load Vids</button>
-  </div>
   <div id="debugBox" style="display:none"></div>
   <div id="videoGrid"></div>
 </main>
 <script>
-const AppStore = (() => {
-  let secureKey = '';
-  return {
-    getKey: () => secureKey,
-    setKey: (k) => { secureKey = k; }
-  };
-})();
-
-function submitKey() {
-  const val = document.getElementById('apiKeyInput').value.trim();
-  if (val) {
-    AppStore.setKey(val);
-    document.getElementById('keyBar').style.display = 'none';
-    loadVideos();
-  }
-}
+const apiKey = '__YOUTUBE_API_KEY__';
 
 function showDebug(msg) {
   const dbg = document.getElementById('debugBox');
@@ -62,11 +40,10 @@ function showDebug(msg) {
 }
 
 async function loadVideos() {
-  const apiKey = AppStore.getKey();
   const grid = document.getElementById('videoGrid');
-  if (!apiKey) {
-    document.getElementById('keyBar').style.display = 'flex';
-    grid.innerHTML = '<p style="color:#ff4444">Please enter your YouTube API key above to load videos.</p>';
+  if (apiKey.startsWith('__')) {
+    grid.innerHTML = '<p style="color:#ff4444">API key not injected yet by GitHub Actions!</p>';
+    showDebug('Placeholder __YOUTUBE_API_KEY__ was not replaced during build.');
     return;
   }
   grid.innerHTML = '<p style="color:#aaa">Loading vids...</p>';
@@ -99,7 +76,6 @@ async function loadVideos() {
   }
 }
 
-// Trigger initial check on load to show the input bar if key is missing
 loadVideos();
 </script>
 </body>
